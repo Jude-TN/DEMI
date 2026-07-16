@@ -20,6 +20,8 @@ accounts below.
 - `app/api/checklist-templates` — Saves a checklist's structure as a reusable team template
 - `app/api/agents` — Lists all agent profiles, for the add-agent picker
 - `app/api/transaction-agents` — Links or unlinks an agent from a transaction
+- `app/register` — Self-serve registration for both realtors and TCs, gated by a TC access code for the TC role
+- `app/api/register` — Creates the Supabase auth account and sets the correct role server-side
 - `components/Checklists.tsx` — A transaction can carry multiple independent checklists at once
 - `components/AgentManager.tsx` — Add or remove which agents can see a given transaction
 - `supabase/schema.sql` — Full database schema with row-level security (TC = full access, agents = read-only, own deals only)
@@ -55,6 +57,8 @@ bar, and AI summary all populate from there.
 
 Copy `.env.example` to `.env.local` and fill in everything from steps 1–2.
 Generate any random string for `INBOUND_EMAIL_SECRET` (e.g. run `openssl rand -hex 16`).
+Same for `TC_SIGNUP_CODE` — just make one up, this is the code you'll hand to your
+actual TC team so they can register with TC access (see step 7).
 
 ### 4. Run it locally to confirm everything connects
 
@@ -85,25 +89,40 @@ programmatically is different from sending it.
    `https://your-deployed-url.vercel.app/api/inbound-email?secret=YOUR_INBOUND_EMAIL_SECRET`
 5. Send a test email to `88bimini-ave@deals.transactionnerd.com` (matching a real transaction's `email_slug`) and confirm it shows up in that deal's stream
 
-### 7. Creating transactions and adding agents
+### 7. Registration is now self-serve
 
-Both are now built into the UI. From the board, "+ New transaction" opens a form
-for address, service type, and closing date, with an option to auto-attach the
-standard checklist for that service type. From a transaction's detail page, "+ Add
-agent" lets you link any existing agent so it shows up on their dashboard.
+Both realtors and TCs create their own accounts at `/register` — no more creating
+every login by hand in Supabase's dashboard.
 
-One important catch: an agent has to already have a Supabase Auth account (and
-therefore a `profiles` row) before they'll show up in that picker. For now that
-means creating their login yourself in Authentication → Users, the same way you
-created your own TC login in step 4. A self-serve "invite an agent by email" flow
-isn't built yet — see the list below.
+- **Realtors** pick "I'm a Realtor" and register freely.
+- **TCs** pick "I'm a TC" and must enter the `TC_SIGNUP_CODE` you set in your
+  environment variables. Give that code only to your actual TC team — anyone
+  who has it gets full read/write access to every transaction. Anyone who gets
+  the role wrong, or doesn't have the code, registers as a realtor instead and
+  can be promoted manually later if needed:
+  `update profiles set role = 'tc' where email = '...';`
+
+A logged-in user can never grant themselves the TC role by editing their own
+profile — that's blocked at the database level (see the
+`no_self_role_escalation` trigger in `schema.sql`), not just hidden in the UI.
+
+Once someone registers as a realtor, a TC still needs to explicitly link them
+to a transaction via "+ Add agent" before that transaction shows up on their
+dashboard — registering alone doesn't grant visibility into any deals.
+
+Your original TC login from step 4 above still works exactly as before; you
+don't need to re-register yourself.
 
 ## What's deliberately not built yet
 
 - The public marketing site (hero, pricing, about, intake) — that's a separate,
   simpler piece we already designed; it doesn't need any of the above accounts
-- Email/password reset flows, invite-by-email for new agents (agents need a Supabase
-  auth account created first before a TC can add them to a deal — see step 7 below)
+- Password reset flow
+- Email verification on signup (accounts are auto-confirmed for simplicity — fine
+  for an internal tool, worth revisiting if registration opens up more broadly)
+- Rate limiting on `/api/register` — nothing currently stops someone from
+  submitting the form repeatedly; low risk for an internal tool, worth adding
+  before this is linked from a public marketing site
 - Mobile-responsive polish beyond the basics already in place
 - A way to delete/reorder checklists once attached (can remove via Supabase table editor for now)
 - Editing a saved checklist template after creation (delete and recreate for now)

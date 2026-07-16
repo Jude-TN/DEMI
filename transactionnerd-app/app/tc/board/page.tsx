@@ -2,11 +2,19 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { STATUS_LABELS, SERVICE_LABELS, type Transaction, type TransactionStatus } from "@/lib/types";
 import ProgressBar from "@/components/ProgressBar";
+import SignOutButton from "@/components/SignOutButton";
 
 export const dynamic = "force-dynamic";
 
 export default async function TCBoardPage() {
   const supabase = createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const { data: profile } = user
+    ? await supabase.from("profiles").select("full_name").eq("id", user.id).single()
+    : { data: null };
 
   const { data: transactions } = await supabase
     .from("transactions")
@@ -46,6 +54,9 @@ export default async function TCBoardPage() {
           >
             + New transaction
           </Link>
+          <div className="w-px h-4 bg-white/15" />
+          <span className="text-[10px] text-white/60">{profile?.full_name}</span>
+          <SignOutButton light />
         </div>
       </div>
 

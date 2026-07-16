@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { SERVICE_LABELS, type Transaction } from "@/lib/types";
 import ProgressBar from "@/components/ProgressBar";
 import StatusBadge from "@/components/StatusBadge";
+import SignOutButton from "@/components/SignOutButton";
 
 export const dynamic = "force-dynamic";
 
@@ -57,6 +58,8 @@ export default async function AgentDashboard() {
           <div className="w-6 h-6 rounded-full bg-sage flex items-center justify-center text-[9px] font-medium text-charcoal">
             {profile?.full_name?.slice(0, 2).toUpperCase()}
           </div>
+          <div className="w-px h-4 bg-white/15 mx-1" />
+          <SignOutButton light />
         </div>
       </div>
 
