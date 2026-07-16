@@ -163,7 +163,8 @@ create policy "tc manage templates" on checklist_templates for all using (is_tc(
 create policy "tc manage template_items" on checklist_template_items for all using (is_tc()) with check (is_tc());
 
 -- Auto-create a profile row whenever a new auth user signs up.
--- Role defaults to 'agent'; promote TC team members to 'tc' manually in the table editor.
+-- Role defaults to 'agent'; promote TC team members to 'tc' manually in the table editor,
+-- or via the registration flow's TC access code (see app/api/register/route.ts).
 create or replace function handle_new_user()
 returns trigger
 language plpgsql security definer
@@ -178,3 +179,23 @@ $$;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure handle_new_user();
+
+-- Prevent a logged-in user from granting themselves the 'tc' role by calling
+-- supabase.from('profiles').update({ role: 'tc' }) directly. auth.uid() is null
+-- when a request comes from the service-role key (e.g. the registration API
+-- after validating a TC access code), so that path is unaffected.
+create or replace function prevent_role_self_escalation()
+returns trigger
+language plpgsql
+as $$
+begin
+  if auth.uid() is not null and new.role is distinct from old.role then
+    raise exception 'Role changes must go through the registration flow or an admin.';
+  end if;
+  return new;
+end;
+$$;
+
+create trigger no_self_role_escalation
+  before update on profiles
+  for each row execute procedure prevent_role_self_escalation();
