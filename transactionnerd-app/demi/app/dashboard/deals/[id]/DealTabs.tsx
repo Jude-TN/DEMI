@@ -219,7 +219,7 @@ function DocumentsTab({ deal }: { deal: any }) {
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 11, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{doc.name}</div>
               <div style={{ fontSize: 9, color: "var(--dim)", fontFamily: "monospace" }}>
-                {doc.file_size_bytes ? `${Math.round(Number(doc.file_size_bytes) / 1024)}KB · ` : ""}{formatShort(doc.uploaded_at ?? doc.created_at ?? "")}
+                {doc.file_size_bytes ? `${Math.round(Number(doc.file_size_bytes) / 1024)}KB · ` : ""}{formatShort(doc.uploaded_at ?? doc.uploaded_at ?? "")}
                 {doc.uploader && ` · ${doc.uploader.full_name}`}
               </div>
             </div>
