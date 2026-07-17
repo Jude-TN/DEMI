@@ -15,7 +15,7 @@ export async function summarizeEmailForStream(params: {
   const { address, subject, from, body } = params;
 
   const message = await anthropic.messages.create({
-    model: "claude-sonnet-4-6",
+    model: "claude-sonnet-4-5
     max_tokens: 200,
     system:
       "You write single-sentence updates for a real estate transaction activity stream. " +
@@ -48,7 +48,7 @@ export async function summarizeWeek(entries: string[]): Promise<string> {
   }
 
   const message = await anthropic.messages.create({
-    model: "claude-sonnet-4-6",
+    model: "claude-sonnet-4-5
     max_tokens: 150,
     system:
       "You summarize a real estate transaction's recent activity into 2-3 short sentences " +
