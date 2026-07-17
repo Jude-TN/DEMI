@@ -1,52 +1,26 @@
-// ─── Enums ────────────────────────────────────────────────────────────────────
+// ─── Core enums ───────────────────────────────────────────────────────────────
 
-export type UserRole = "admin" | "agent" | "tc";
+export type UserRole   = "admin" | "agent" | "tc";
+export type DealStage  = "lead" | "listing" | "under_contract" | "clear_to_close" | "closed";
+export type DealSide   = "buyer" | "seller" | "dual";
+export type DocStatus  = "missing" | "received" | "executed" | "cleared";
+export type ContactRole = "buyer" | "seller" | "buyer_agent" | "seller_agent" | "title" | "lender" | "inspector" | "other";
+export type BrokeragePlan = "starter" | "pro" | "team";
 
-export type DealStage =
-  | "lead"
-  | "listing"
-  | "under_contract"
-  | "clear_to_close"
-  | "closed"
-  | "cancelled";
+// ─── Database entities (match handoff spec exactly) ───────────────────────────
 
-export type DealSide = "buyer" | "seller" | "dual";
-
-export type TaskStatus = "open" | "completed" | "waived";
-export type TaskPriority = "high" | "medium" | "low";
-
-export type DocStatus = "missing" | "received" | "executed" | "waived";
-export type DocType =
-  | "purchase_agreement"
-  | "listing_agreement"
-  | "seller_disclosure"
-  | "hoa_estoppel"
-  | "hoa_docs"
-  | "title_commitment"
-  | "commitment_letter"
-  | "appraisal"
-  | "inspection_report"
-  | "closing_disclosure"
-  | "survey"
-  | "addendum"
-  | "other";
-
-export type ContactRole =
-  | "buyer"
-  | "seller"
-  | "buyer_agent"
-  | "seller_agent"
-  | "title"
-  | "lender"
-  | "inspector"
-  | "appraiser"
-  | "hoa"
-  | "attorney"
-  | "other";
-
-export type NotifChannel = "in_app" | "email" | "both";
-
-// ─── Database row types ───────────────────────────────────────────────────────
+export interface User {
+  id: string;
+  email: string;
+  full_name: string;
+  role: UserRole;
+  avatar_url: string | null;
+  license_number: string | null;
+  tc_company: string | null;        // e.g. "TransactionNerd.com"
+  tc_capacity_cap: number;          // default 33, TC only
+  markets: string[] | null;
+  created_at: string;
+}
 
 export interface Brokerage {
   id: string;
@@ -54,64 +28,58 @@ export interface Brokerage {
   team_name: string | null;
   license_number: string | null;
   primary_market: string | null;
-  logo_url: string | null;
   timezone: string;
-  default_tc_id: string | null;
+  plan: BrokeragePlan;
   created_at: string;
 }
 
-export interface User {
+export interface BrokerageMember {
   id: string;
-  brokerage_id: string | null;
-  email: string;
-  full_name: string;
+  brokerage_id: string;
+  user_id: string;
   role: UserRole;
-  license_number: string | null;
-  phone: string | null;
-  avatar_url: string | null;
-  created_at: string;
+  is_active: boolean;
+  joined_at: string;
+  // joined
+  user?: User;
+  brokerage?: Brokerage;
 }
 
 export interface Deal {
   id: string;
   brokerage_id: string;
+  agent_id: string;
+  tc_id: string | null;
   address: string;
-  unit: string | null;
   city: string;
-  state: string;
-  zip: string;
+  mls_number: string | null;
   sale_price: number | null;
-  close_date: string | null;
-  effective_date: string | null;
   side: DealSide;
   stage: DealStage;
-  agent_id: string | null;
-  tc_id: string | null;
-  mls_number: string | null;
+  effective_date: string | null;
+  close_date: string | null;
+  closed_at: string | null;
+  close_price: number | null;
+  checklist_template_id: string | null;
   notes: string | null;
   created_at: string;
-  updated_at: string;
-  closed_at: string | null;
+  archived_at: string | null;
   // joined
   agent?: User;
   tc?: User;
-  _task_count?: number;
-  _completed_task_count?: number;
+  brokerage?: Brokerage;
 }
 
 export interface Task {
   id: string;
   deal_id: string;
-  brokerage_id: string;
+  template_step_id: string | null;
   label: string;
   assignee_id: string | null;
   due_date: string | null;
-  status: TaskStatus;
-  priority: TaskPriority;
   completed_at: string | null;
-  template_step_id: string | null;
+  is_required: boolean;
   sort_order: number;
-  notes: string | null;
   created_at: string;
   // joined
   assignee?: User;
@@ -120,16 +88,14 @@ export interface Task {
 export interface Document {
   id: string;
   deal_id: string;
-  brokerage_id: string;
+  uploaded_by: string | null;
   name: string;
   file_url: string | null;
   file_size_bytes: number | null;
-  doc_type: DocType;
+  doc_type: string;
   status: DocStatus;
-  uploaded_by: string | null;
+  external_ref_url: string | null;    // DocuSign envelope / Dotloop link
   uploaded_at: string | null;
-  notes: string | null;
-  created_at: string;
   // joined
   uploader?: User;
 }
@@ -137,7 +103,6 @@ export interface Document {
 export interface Contact {
   id: string;
   deal_id: string;
-  brokerage_id: string;
   role: ContactRole;
   full_name: string;
   email: string | null;
@@ -150,32 +115,42 @@ export interface Contact {
 export interface Message {
   id: string;
   deal_id: string;
-  brokerage_id: string;
   sender_id: string;
   body: string;
   attachment_url: string | null;
   created_at: string;
-  // joined
   sender?: User;
 }
 
 export interface TimelineEvent {
   id: string;
   deal_id: string;
-  brokerage_id: string;
+  actor_id: string | null;
   event_type: string;
   description: string;
-  user_id: string | null;
+  metadata: Record<string, unknown> | null;
   created_at: string;
-  // joined
-  user?: User;
+  actor?: User;
+}
+
+export interface Notification {
+  id: string;
+  user_id: string;
+  deal_id: string | null;
+  type: string;
+  title: string;
+  body: string;
+  deep_link: string | null;
+  read_at: string | null;
+  created_at: string;
+  deal?: Pick<Deal, "id" | "address">;
 }
 
 export interface ChecklistTemplate {
   id: string;
   brokerage_id: string;
   name: string;
-  side: DealSide | "all";
+  side: DealSide | "dual" | null;
   is_default: boolean;
   created_at: string;
   steps?: ChecklistTemplateStep[];
@@ -185,33 +160,56 @@ export interface ChecklistTemplateStep {
   id: string;
   template_id: string;
   label: string;
-  assignee_role: "tc" | "agent" | "any";
+  default_assignee_role: "tc" | "agent" | null;
   days_from_effective: number | null;
-  required: boolean;
-  auto_notify: boolean;
-  linked_doc_type: DocType | null;
+  is_required: boolean;
+  notify_on_complete: boolean;
   sort_order: number;
-}
-
-export interface Notification {
-  id: string;
-  user_id: string;
-  brokerage_id: string;
-  deal_id: string | null;
-  title: string;
-  body: string;
-  channel: NotifChannel;
-  read: boolean;
   created_at: string;
-  // joined
-  deal?: Deal;
 }
 
-// ─── View / UI types ──────────────────────────────────────────────────────────
+export interface TCRoutingRule {
+  id: string;
+  brokerage_id: string;
+  agent_id: string;
+  default_tc_id: string;
+  fallback_tc_id: string | null;
+  updated_at: string;
+  agent?: User;
+  default_tc?: User;
+  fallback_tc?: User | null;
+}
+
+export interface IntegrationConnection {
+  id: string;
+  brokerage_id: string;
+  provider: "fub" | "dotloop" | "docusign" | "skyslope" | "zapier";
+  status: "connected" | "error" | "disconnected";
+  last_synced_at: string | null;
+  token_expires_at: string | null;
+  created_at: string;
+}
+
+// ─── API response types ───────────────────────────────────────────────────────
+
+export interface TCCapacityResponse {
+  user_id: string;
+  full_name: string;
+  tc_company: string | null;
+  total_files: number;
+  cap: number;
+  available: number;
+  is_recommended?: boolean;
+  reason?: "default" | "fallback";
+  // Only populated when requester === TC themselves
+  breakdown_by_brokerage: Array<{ brokerage_id: string; team_name: string; file_count: number }> | null;
+}
 
 export interface DealWithProgress extends Deal {
+  task_count: number;
+  completed_task_count: number;
+  overdue_task_count: number;
   progress_pct: number;
-  overdue_count: number;
 }
 
 export interface AgentStats {
@@ -219,13 +217,13 @@ export interface AgentStats {
   active_deals: number;
   closed_30d: number;
   closed_ytd: number;
-  on_time_rate: number;
+  volume_ytd: number;
 }
 
 export interface TCStats {
   user: User;
-  active_deals: number;
-  closed_30d: number;
-  on_time_rate: number;
+  total_files: number;
+  cap: number;
+  available: number;
   overdue_tasks: number;
 }

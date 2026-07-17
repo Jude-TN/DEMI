@@ -1,28 +1,24 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
-import { Btn, Field } from "@/components/ui";
+import { Btn, Field, TCPickerCard, ErrorBanner, Tag } from "@/components/ui";
 import Topbar from "@/components/layout/Topbar";
-import type { User, DealStage, DealSide, ChecklistTemplate } from "@/types";
+import type { TCCapacityResponse, ChecklistTemplate } from "@/types";
+import { createClient } from "@/lib/supabase/client";
 
 export default function NewDealPage() {
   const router = useRouter();
   const supabase = createClient();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [tcs, setTcs] = useState<User[]>([]);
-  const [agents, setAgents] = useState<User[]>([]);
+  const [tcs, setTcs] = useState<TCCapacityResponse[]>([]);
   const [templates, setTemplates] = useState<ChecklistTemplate[]>([]);
-  const [brokId, setBrokId] = useState<string | null>(null);
   const [myId, setMyId] = useState<string | null>(null);
-
   const [form, setForm] = useState({
-    address: "", unit: "", city: "", state: "FL", zip: "",
-    sale_price: "", close_date: "", effective_date: "",
-    side: "buyer" as DealSide, stage: "under_contract" as DealStage,
-    agent_id: "", tc_id: "", mls_number: "", notes: "",
-    template_id: "",
+    address: "", city: "", mls_number: "", sale_price: "",
+    side: "buyer", stage: "under_contract",
+    close_date: "", effective_date: "",
+    tc_id: "", checklist_template_id: "", notes: "",
   });
 
   useEffect(() => {
@@ -30,200 +26,153 @@ export default function NewDealPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
       setMyId(user.id);
-      const { data: profile } = await supabase.from("users").select("brokerage_id, role").eq("id", user.id).single();
-      if (!profile?.brokerage_id) return;
-      setBrokId(profile.brokerage_id);
-      const { data: members } = await supabase.from("users").select("*").eq("brokerage_id", profile.brokerage_id);
-      setTcs((members ?? []).filter((u: User) => u.role === "tc" || u.role === "admin"));
-      setAgents((members ?? []).filter((u: User) => u.role === "agent" || u.role === "admin"));
-      const { data: tmpl } = await supabase.from("checklist_templates").select("*").eq("brokerage_id", profile.brokerage_id);
-      setTemplates(tmpl ?? []);
-      // Pre-select default TC and agent
-      const defaultTc = (members ?? []).find((u: User) => u.role === "tc");
-      const me = members?.find((u: User) => u.id === user.id);
-      setForm(f => ({
-        ...f,
-        tc_id: defaultTc?.id ?? "",
-        agent_id: me?.role === "agent" ? me.id : "",
-      }));
+
+      // Load available TCs (with capacity)
+      const res = await fetch("/api/tc/available");
+      if (res.ok) {
+        const data: TCCapacityResponse[] = await res.json();
+        setTcs(data);
+      }
+
+      // Load checklist templates
+      const { data: tmpls } = await supabase.from("checklist_templates")
+        .select("*")
+        .order("name");
+      setTemplates(tmpls ?? []);
+
+      // Pre-select TC via routing suggest
+      const suggestRes = await fetch(`/api/routing-rules/suggest/${user.id}`);
+      if (suggestRes.ok) {
+        const suggested = await suggestRes.json();
+        if (suggested?.user_id) setForm(f => ({ ...f, tc_id: suggested.user_id }));
+      }
+
+      // Auto-select default template matching buyer side
+      const buyerDefault = (tmpls ?? []).find((t: any) => t.side === "buyer" && t.is_default);
+      if (buyerDefault) setForm(f => ({ ...f, checklist_template_id: buyerDefault.id }));
     }
     boot();
-  }, [supabase]);
+  }, []);
 
-  function set(key: string) {
+  // Update template suggestion when side changes
+  useEffect(() => {
+    if (!templates.length) return;
+    const match = templates.find(t => (t.side === form.side || t.side === null) && t.is_default);
+    if (match) setForm(f => ({ ...f, checklist_template_id: match.id }));
+  }, [form.side, templates]);
+
+  function set(k: string) {
     return (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
-      setForm(f => ({ ...f, [key]: e.target.value }));
+      setForm(f => ({ ...f, [k]: e.target.value }));
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.address || !brokId) { setError("Address is required."); return; }
+    if (!form.address) { setError("Address is required."); return; }
     setSaving(true); setError("");
-
-    const { data: deal, error: dealErr } = await supabase.from("deals").insert({
-      brokerage_id: brokId,
-      address: form.address, unit: form.unit || null,
-      city: form.city, state: form.state, zip: form.zip,
-      sale_price: form.sale_price ? parseFloat(form.sale_price.replace(/,/g, "")) : null,
-      close_date: form.close_date || null,
-      effective_date: form.effective_date || null,
-      side: form.side, stage: form.stage,
-      agent_id: form.agent_id || null,
-      tc_id: form.tc_id || null,
-      mls_number: form.mls_number || null,
-      notes: form.notes || null,
-    }).select().single();
-
-    if (dealErr || !deal) { setError(dealErr?.message ?? "Failed to create deal."); setSaving(false); return; }
-
-    // Generate checklist from template
-    if (form.template_id) {
-      const { data: steps } = await supabase
-        .from("checklist_template_steps")
-        .select("*")
-        .eq("template_id", form.template_id)
-        .order("sort_order");
-
-      if (steps && steps.length > 0) {
-        const effectiveDate = form.effective_date ? new Date(form.effective_date) : new Date();
-        const tasks = steps.map((step: any, i: number) => {
-          let dueDate: string | null = null;
-          if (step.days_from_effective != null) {
-            const d = new Date(effectiveDate);
-            d.setDate(d.getDate() + step.days_from_effective);
-            dueDate = d.toISOString().split("T")[0];
-          }
-          return {
-            deal_id: deal.id, brokerage_id: brokId,
-            label: step.label,
-            assignee_id: step.assignee_role === "tc" ? (form.tc_id || null) : step.assignee_role === "agent" ? (form.agent_id || null) : null,
-            due_date: dueDate, sort_order: i, status: "open", priority: "medium",
-          };
-        });
-        await supabase.from("tasks").insert(tasks);
-      }
-    }
-
-    // Log timeline event
-    await supabase.from("timeline_events").insert({
-      deal_id: deal.id, brokerage_id: brokId,
-      event_type: "deal_opened", description: "Deal opened",
-      user_id: myId,
+    const res = await fetch("/api/deals", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...form, agent_id: myId, sale_price: form.sale_price ? parseFloat(form.sale_price.replace(/,/g, "")) : null }),
     });
-
-    // Notify assigned TC
-    if (form.tc_id) {
-      await supabase.from("notifications").insert({
-        user_id: form.tc_id, brokerage_id: brokId,
-        deal_id: deal.id, title: "New deal assigned",
-        body: `You've been assigned to ${form.address}`,
-        channel: "in_app",
-      });
-    }
-
-    router.push(`/dashboard/deals/${deal.id}`);
+    if (!res.ok) { const d = await res.json(); setError(d.error ?? "Failed to create deal."); setSaving(false); return; }
+    const deal = await res.json();
+    router.push(`/deals/${deal.id}`);
   }
+
+  const selectedTC = tcs.find(t => t.user_id === form.tc_id);
+  const filteredTmpls = templates.filter(t => !t.side || t.side === form.side || t.side === "dual");
 
   return (
     <>
-      <Topbar title="New deal" />
-      <div style={{ flex: 1, overflowY: "auto", padding: "16px" }}>
-        <form onSubmit={handleSubmit}>
-          <div style={{ maxWidth: 680, display: "flex", flexDirection: "column", gap: 14 }}>
+      <Topbar title="New deal" backHref="/deals" backLabel="All deals" />
+      <div style={{ flex: 1, overflowY: "auto", padding: "14px 16px" }}>
+        <form onSubmit={submit}>
+          <div style={{ maxWidth: 800, display: "grid", gridTemplateColumns: "1fr 320px", gap: 12, alignItems: "start" }}>
 
-            <div style={{ background: "var(--panel)", border: "1px solid var(--bdr)", borderRadius: 8, padding: 16 }}>
-              <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 14, color: "var(--text)" }}>Property</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                <Field label="Address" required>
-                  <input value={form.address} onChange={set("address")} placeholder="4821 Chestnut Ave" required />
-                </Field>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 80px", gap: 10 }}>
-                  <Field label="City"><input value={form.city} onChange={set("city")} placeholder="Naples" /></Field>
-                  <Field label="Zip"><input value={form.zip} onChange={set("zip")} placeholder="34119" /></Field>
+            {/* Left column */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <Panel title="Property">
+                <div style={{ display: "flex", flexDirection: "column", gap: 11 }}>
+                  <Field label="Address" required><input value={form.address} onChange={set("address")} placeholder="4821 Chestnut Ave" required /></Field>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 100px", gap: 8 }}>
+                    <Field label="City"><input value={form.city} onChange={set("city")} placeholder="Naples" /></Field>
+                    <Field label="MLS #"><input value={form.mls_number} onChange={set("mls_number")} placeholder="A11421" /></Field>
+                  </div>
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                  <Field label="MLS number"><input value={form.mls_number} onChange={set("mls_number")} placeholder="A11421904" /></Field>
-                  <Field label="Unit / Suite"><input value={form.unit} onChange={set("unit")} placeholder="#803" /></Field>
+              </Panel>
+
+              <Panel title="Transaction details">
+                <div style={{ display: "flex", flexDirection: "column", gap: 11 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+                    <Field label="Side"><select value={form.side} onChange={set("side")}><option value="buyer">Buyer</option><option value="seller">Seller</option><option value="dual">Dual</option></select></Field>
+                    <Field label="Stage"><select value={form.stage} onChange={set("stage")}><option value="lead">Lead</option><option value="listing">Listing</option><option value="under_contract">Under Contract</option><option value="clear_to_close">Clear to Close</option></select></Field>
+                    <Field label="Sale price"><input value={form.sale_price} onChange={set("sale_price")} placeholder="485,000" /></Field>
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                    <Field label="Effective date"><input type="date" value={form.effective_date} onChange={set("effective_date")} /></Field>
+                    <Field label="Close date"><input type="date" value={form.close_date} onChange={set("close_date")} /></Field>
+                  </div>
                 </div>
+              </Panel>
+
+              <Panel title="Notes">
+                <textarea value={form.notes} onChange={set("notes")} rows={3} placeholder="Special instructions or context…" />
+              </Panel>
+
+              <ErrorBanner msg={error} />
+              <div style={{ display: "flex", gap: 8 }}>
+                <Btn variant="primary" type="submit" loading={saving}>Create deal</Btn>
+                <Btn variant="ghost" type="button" onClick={() => router.back()}>Cancel</Btn>
               </div>
             </div>
 
-            <div style={{ background: "var(--panel)", border: "1px solid var(--bdr)", borderRadius: 8, padding: 16 }}>
-              <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 14 }}>Transaction details</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
-                  <Field label="Side">
-                    <select value={form.side} onChange={set("side")}>
-                      <option value="buyer">Buyer</option>
-                      <option value="seller">Seller</option>
-                      <option value="dual">Dual</option>
-                    </select>
-                  </Field>
-                  <Field label="Stage">
-                    <select value={form.stage} onChange={set("stage")}>
-                      <option value="lead">Lead</option>
-                      <option value="listing">Listing</option>
-                      <option value="under_contract">Under Contract</option>
-                      <option value="clear_to_close">Clear to Close</option>
-                    </select>
-                  </Field>
-                  <Field label="Sale price">
-                    <input value={form.sale_price} onChange={set("sale_price")} placeholder="485,000" />
-                  </Field>
+            {/* Right column */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <Panel title="Assign TC">
+                <div style={{ fontSize: 10, color: "var(--muted)", marginBottom: 8 }}>
+                  TCs sorted by available capacity. Green = available, amber = near cap, red = at cap.
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                  <Field label="Effective date"><input type="date" value={form.effective_date} onChange={set("effective_date")} /></Field>
-                  <Field label="Close date"><input type="date" value={form.close_date} onChange={set("close_date")} /></Field>
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  {tcs.length === 0 && <div style={{ fontSize: 11, color: "var(--dim)" }}>No TCs connected to your team yet.</div>}
+                  {tcs.map(tc => (
+                    <TCPickerCard key={tc.user_id} tc={tc} selected={form.tc_id === tc.user_id} onClick={() => setForm(f => ({ ...f, tc_id: tc.user_id }))} />
+                  ))}
+                  <button type="button" onClick={() => setForm(f => ({ ...f, tc_id: "" }))} style={{ fontSize: 10, color: "var(--dim)", background: "none", border: "none", cursor: "pointer", textAlign: "left" as const, padding: "4px 0" }}>
+                    ✕ Clear TC selection (assign later)
+                  </button>
                 </div>
-              </div>
-            </div>
+              </Panel>
 
-            <div style={{ background: "var(--panel)", border: "1px solid var(--bdr)", borderRadius: 8, padding: 16 }}>
-              <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 14 }}>Assigned team</div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                <Field label="Transaction coordinator">
-                  <select value={form.tc_id} onChange={set("tc_id")}>
-                    <option value="">— Unassigned —</option>
-                    {tcs.map(tc => <option key={tc.id} value={tc.id}>{tc.full_name}</option>)}
-                  </select>
-                </Field>
-                <Field label="Agent">
-                  <select value={form.agent_id} onChange={set("agent_id")}>
-                    <option value="">— Unassigned —</option>
-                    {agents.map(a => <option key={a.id} value={a.id}>{a.full_name}</option>)}
-                  </select>
-                </Field>
-              </div>
-            </div>
-
-            <div style={{ background: "var(--panel)", border: "1px solid var(--bdr)", borderRadius: 8, padding: 16 }}>
-              <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 14 }}>Checklist template</div>
-              <Field label="Auto-generate tasks from template">
-                <select value={form.template_id} onChange={set("template_id")}>
-                  <option value="">— No template —</option>
-                  {templates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-                </select>
-              </Field>
-              {form.template_id && (
-                <div style={{ marginTop: 8, fontSize: 11, color: "var(--sage)" }}>
-                  ✓ Tasks will be auto-generated based on the effective date
+              <Panel title="Checklist template">
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  <div onClick={() => setForm(f => ({ ...f, checklist_template_id: "" }))} style={{ background: !form.checklist_template_id ? "var(--teal-d)" : "var(--card)", border: `1px solid ${!form.checklist_template_id ? "var(--teal-b)" : "var(--bdr)"}`, borderRadius: 6, padding: "7px 10px", cursor: "pointer", fontSize: 11, color: "var(--muted)" }}>
+                    No template
+                  </div>
+                  {filteredTmpls.map(t => (
+                    <div key={t.id} onClick={() => setForm(f => ({ ...f, checklist_template_id: t.id }))} style={{ background: form.checklist_template_id === t.id ? "var(--teal-d)" : "var(--card)", border: `1px solid ${form.checklist_template_id === t.id ? "var(--teal-b)" : "var(--bdr)"}`, borderRadius: 6, padding: "7px 10px", cursor: "pointer" }}>
+                      <div style={{ fontSize: 11, fontWeight: 500 }}>{t.name}</div>
+                      {t.is_default && <Tag label="Default" color="teal" size={8} />}
+                    </div>
+                  ))}
+                  {form.checklist_template_id && form.effective_date && (
+                    <div style={{ fontSize: 10, color: "var(--sage)", marginTop: 2 }}>✓ Tasks will be auto-generated from the effective date</div>
+                  )}
                 </div>
-              )}
-            </div>
-
-            <Field label="Notes">
-              <textarea value={form.notes} onChange={set("notes")} rows={3} placeholder="Any special instructions or context…" />
-            </Field>
-
-            {error && <div style={{ fontSize: 12, color: "var(--rose)", background: "var(--rose-d)", border: "1px solid var(--rose-b)", borderRadius: 6, padding: "8px 12px" }}>{error}</div>}
-
-            <div style={{ display: "flex", gap: 8 }}>
-              <Btn variant="primary" type="submit" loading={saving}>Create deal</Btn>
-              <Btn variant="ghost" type="button" onClick={() => router.back()}>Cancel</Btn>
+              </Panel>
             </div>
           </div>
         </form>
       </div>
     </>
+  );
+}
+
+function Panel({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div style={{ background: "var(--panel)", border: "1px solid var(--bdr)", borderRadius: 8, overflow: "hidden" }}>
+      <div style={{ padding: "9px 13px", borderBottom: "1px solid var(--bdr)", fontSize: 12, fontWeight: 600 }}>{title}</div>
+      <div style={{ padding: "12px 13px" }}>{children}</div>
+    </div>
   );
 }
