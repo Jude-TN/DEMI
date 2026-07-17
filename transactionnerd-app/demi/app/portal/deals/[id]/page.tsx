@@ -38,7 +38,7 @@ export default async function PortalDealPage({ params }: { params: { id: string 
         </div>
         <div style={{ fontSize: 17, fontWeight: 700, marginBottom: 4 }}>{deal.address}</div>
         {deal.sale_price && <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 8 }}>Sale price: <span style={{ color: "var(--text)", fontFamily: "monospace" }}>${Number(deal.sale_price).toLocaleString()}</span></div>}
-        <div style={{ display: "flex", justify: "space-between", marginBottom: 4 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
           <span style={{ fontSize: 9, color: "var(--muted)" }}>Closing progress — {done ?? 0}/{total ?? 0} tasks</span>
           <span style={{ fontSize: 9, fontFamily: "monospace", color: "var(--teal)" }}>{pct}%</span>
         </div>
