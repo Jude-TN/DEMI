@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Tag, PriorityTag, Avatar, Btn, Modal, Field, SectionLabel, Empty } from "@/components/ui";
+import { Tag, Avatar, Btn, Modal, Field, SectionLabel, Empty } from "@/components/ui";
 import type { Task, Document, Message, TimelineEvent, Contact, User, ContactRole, DocStatus } from "@/types";
 import { formatDate, formatShort, isOverdue, isDueToday } from "@/lib/utils/dates";
 
