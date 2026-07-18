@@ -57,11 +57,11 @@ export default async function DashboardPage() {
           <div style={{ background: "var(--panel)", border: "1px solid var(--bdr)", borderRadius: 8, overflow: "hidden" }}>
             <div style={{ padding: "9px 13px", borderBottom: "1px solid var(--bdr)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span style={{ fontSize: 12, fontWeight: 600 }}>⚠️ Overdue tasks</span>
-              <Link href="/deals" style={{ fontSize: 10, color: "var(--teal)" }}>All deals →</Link>
+              <Link href="/dashboard/deals" style={{ fontSize: 10, color: "var(--teal)" }}>All deals →</Link>
             </div>
             {(!overdueTasks || overdueTasks.length === 0) && <div style={{ padding: "24px 13px", textAlign: "center", fontSize: 12, color: "var(--muted)" }}>✅ No overdue tasks</div>}
             {overdueTasks?.map((t: any) => (
-              <Link key={t.id} href={`/deals/${t.deal_id}`} style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 13px", borderBottom: "1px solid var(--bdr)" }}>
+              <Link key={t.id} href={`/dashboard/deals/${t.deal_id}`} style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 13px", borderBottom: "1px solid var(--bdr)" }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 11, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.label}</div>
                   <div style={{ fontSize: 10, color: "var(--muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.deals?.address}</div>
@@ -75,7 +75,7 @@ export default async function DashboardPage() {
           <div style={{ background: "var(--panel)", border: "1px solid var(--bdr)", borderRadius: 8, overflow: "hidden" }}>
             <div style={{ padding: "9px 13px", borderBottom: "1px solid var(--bdr)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span style={{ fontSize: 12, fontWeight: 600 }}>📅 Closing this week</span>
-              <Link href="/pipeline" style={{ fontSize: 10, color: "var(--teal)" }}>Pipeline →</Link>
+              <Link href="/dashboard/pipeline" style={{ fontSize: 10, color: "var(--teal)" }}>Pipeline →</Link>
             </div>
             {(!closingDeals || closingDeals.length === 0) && <div style={{ padding: "24px 13px", textAlign: "center", fontSize: 12, color: "var(--muted)" }}>No closings this week</div>}
             {closingDeals?.map(async (deal: any) => {
@@ -84,7 +84,7 @@ export default async function DashboardPage() {
               const pct = total ? Math.round(((done ?? 0) / total) * 100) : 0;
               const days = daysUntil(deal.close_date);
               return (
-                <Link key={deal.id} href={`/deals/${deal.id}`} style={{ display: "block", padding: "8px 13px", borderBottom: "1px solid var(--bdr)" }}>
+                <Link key={deal.id} href={`/dashboard/deals/${deal.id}`} style={{ display: "block", padding: "8px 13px", borderBottom: "1px solid var(--bdr)" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 5 }}>
                     <div style={{ flex: 1, fontSize: 11, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{deal.address}</div>
                     <StageTag stage={deal.stage} />
@@ -104,7 +104,7 @@ export default async function DashboardPage() {
         <div style={{ background: "var(--panel)", border: "1px solid var(--bdr)", borderRadius: 8, padding: "11px 13px" }}>
           <div style={{ fontSize: 11, fontWeight: 600, marginBottom: 9 }}>Quick actions</div>
           <div style={{ display: "flex", gap: 7, flexWrap: "wrap" }}>
-            {[{href:"/deals/new",label:"+ New deal",primary:true},{href:"/pipeline",label:"Pipeline"},{href:"/deals",label:"All deals"},{href:"/contacts",label:"Contacts"},{href:"/reports",label:"Reports"}].map(a=>(
+            {[{href:"/dashboard/deals/new",label:"+ New deal",primary:true},{href:"/dashboard/pipeline",label:"Pipeline"},{href:"/dashboard/deals",label:"All deals"},{href:"/dashboard/contacts",label:"Contacts"},{href:"/dashboard/reports",label:"Reports"}].map(a=>(
               <Link key={a.href} href={a.href}>
                 <div style={{background:a.primary?"var(--teal)":"var(--card)",color:a.primary?"#0a1412":"var(--muted)",border:a.primary?"none":"1px solid var(--bdrs)",borderRadius:6,padding:"6px 12px",fontSize:11,fontWeight:600,cursor:"pointer"}}>{a.label}</div>
               </Link>
