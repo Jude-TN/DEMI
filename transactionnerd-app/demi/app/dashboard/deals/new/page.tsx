@@ -77,7 +77,7 @@ export default function NewDealPage() {
     });
     if (!res.ok) { const d = await res.json(); setError(d.error ?? "Failed to create deal."); setSaving(false); return; }
     const deal = await res.json();
-    router.push(`/deals/${deal.id}`);
+    router.push(`/dashboard/deals/${deal.id}`);
   }
 
   const selectedTC = tcs.find(t => t.user_id === form.tc_id);
@@ -85,7 +85,7 @@ export default function NewDealPage() {
 
   return (
     <>
-      <Topbar title="New deal" backHref="/deals" backLabel="All deals" />
+      <Topbar title="New deal" backHref="/dashboard/deals" backLabel="All deals" />
       <div style={{ flex: 1, overflowY: "auto", padding: "14px 16px" }}>
         <form onSubmit={submit}>
           <div style={{ maxWidth: 800, display: "grid", gridTemplateColumns: "1fr 320px", gap: 12, alignItems: "start" }}>
