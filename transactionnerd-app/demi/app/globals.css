@@ -1,73 +1,24 @@
-/* DEMI design system */
 :root {
-  --bg:       #1C1E22;
-  --sb:       #16181B;
-  --panel:    #22252A;
-  --card:     #2A2D32;
-  --card2:    #30343A;
-  --teal:     #2EBFA5;
-  --teal-d:   rgba(46,191,165,0.13);
-  --teal-b:   rgba(46,191,165,0.28);
-  --amber:    #F4A535;
-  --amber-d:  rgba(244,165,53,0.14);
-  --amber-b:  rgba(244,165,53,0.28);
-  --rose:     #E5535B;
-  --rose-d:   rgba(229,83,91,0.12);
-  --rose-b:   rgba(229,83,91,0.28);
-  --blue:     #4A9EE0;
-  --blue-d:   rgba(74,158,224,0.12);
-  --sage:     #7BAF9E;
-  --text:     #E8EAED;
-  --muted:    #9AA0A8;
-  --dim:      #5A6070;
-  --bdr:      rgba(255,255,255,0.07);
-  --bdrs:     rgba(255,255,255,0.13);
-  --radius:   6px;
+  --bg:#1C1E22; --sb:#16181B; --panel:#22252A; --card:#2A2D32; --card2:#30343A;
+  --teal:#2EBFA5; --teal-d:rgba(46,191,165,0.13); --teal-b:rgba(46,191,165,0.28);
+  --amber:#F4A535; --amber-d:rgba(244,165,53,0.14); --amber-b:rgba(244,165,53,0.28);
+  --rose:#E5535B; --rose-d:rgba(229,83,91,0.12); --rose-b:rgba(229,83,91,0.28);
+  --blue:#4A9EE0; --blue-d:rgba(74,158,224,0.12);
+  --sage:#7BAF9E; --purple:#AFA9EC; --purple-d:rgba(175,169,236,0.12);
+  --text:#E8EAED; --muted:#9AA0A8; --dim:#5A6070;
+  --bdr:rgba(255,255,255,0.07); --bdrs:rgba(255,255,255,0.13);
+  --r:6px;
 }
-
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-html, body { height: 100%; }
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
-  font-size: 13px;
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-}
-
-/* Scrollbar */
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 4px; }
-
-/* Focus ring */
-:focus-visible {
-  outline: 2px solid var(--teal);
-  outline-offset: 2px;
-}
-
-/* Inputs */
-input, select, textarea {
-  background: var(--card);
-  border: 1px solid var(--bdrs);
-  border-radius: var(--radius);
-  color: var(--text);
-  font-family: inherit;
-  font-size: 13px;
-  padding: 8px 11px;
-  outline: none;
-  transition: border-color 0.15s;
-  width: 100%;
-}
-input:focus, select:focus, textarea:focus {
-  border-color: var(--teal-b);
-}
-input::placeholder, textarea::placeholder { color: var(--dim); }
-
-select { cursor: pointer; appearance: none; }
-
-/* Buttons */
-button { cursor: pointer; font-family: inherit; }
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",sans-serif;font-size:13px;line-height:1.5;-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.12);border-radius:4px}
+:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+input,select,textarea{background:var(--card);border:1px solid var(--bdrs);border-radius:var(--r);color:var(--text);font-family:inherit;font-size:13px;padding:8px 11px;outline:none;transition:border-color .15s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--teal-b)}
+input::placeholder,textarea::placeholder{color:var(--dim)}
+select{cursor:pointer;appearance:none}
+button{cursor:pointer;font-family:inherit}
+a{color:inherit;text-decoration:none}
