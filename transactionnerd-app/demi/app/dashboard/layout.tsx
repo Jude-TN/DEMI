@@ -2,8 +2,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import Sidebar from "@/components/layout/Sidebar";
 
-const NAV=[{href:"/dashboard",icon:"▦",label:"Dashboard"},{href:"/pipeline",icon:"⬛",label:"Pipeline"},{href:"/deals",icon:"📋",label:"All deals"},{href:"/notifications",icon:"🔔",label:"Notifications"},];
-const NAV2=[{href:"/contacts",icon:"👥",label:"Contacts"},{href:"/agents",icon:"🏡",label:"Agents"},{href:"/reports",icon:"📊",label:"Reports"},{href:"/settings",icon:"⚙",label:"Settings"},];
+const NAV=[{href:"/dashboard",icon:"▦",label:"Dashboard"},{href:"/dashboard/pipeline",icon:"⬛",label:"Pipeline"},{href:"/dashboard/deals",icon:"📋",label:"All deals"},{href:"/dashboard/notifications",icon:"🔔",label:"Notifications"},];
+const NAV2=[{href:"/dashboard/contacts",icon:"👥",label:"Contacts"},{href:"/dashboard/agents",icon:"🏡",label:"Agents"},{href:"/dashboard/reports",icon:"📊",label:"Reports"},{href:"/dashboard/settings",icon:"⚙",label:"Settings"},];
 
 export default async function DashboardLayout({children}:{children:React.ReactNode}){
   const supabase=await createClient();
