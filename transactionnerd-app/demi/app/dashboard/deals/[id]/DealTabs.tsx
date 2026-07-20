@@ -447,13 +447,14 @@ function businessDaysUntil(dateStr: string): number {
   return count;
 }
 
-// Green = 7+ days away, Yellow = < 3 business days, Red = due now / overdue.
+// Green = 7+ days away, Yellow = approaching (< 7 days or < 3 business days), Red = due now / overdue.
 function urgency(dateStr: string): { color: string; bg: string; label: string } | null {
   if (!dateStr) return null;
   const cal = daysUntil(dateStr);
   const biz = businessDaysUntil(dateStr);
   if (biz <= 0) return { color: "#ef4444", bg: "rgba(239,68,68,0.14)", label: cal < 0 ? "Overdue" : "Due now" };
   if (biz < 3)  return { color: "#f59e0b", bg: "rgba(245,158,11,0.16)", label: biz + " business day" + (biz === 1 ? "" : "s") + " left" };
+  if (cal < 7)  return { color: "#f59e0b", bg: "rgba(245,158,11,0.16)", label: cal + " days away" };
   return { color: "#22c55e", bg: "rgba(34,197,94,0.14)", label: cal + " days away" };
 }
 
@@ -491,7 +492,7 @@ function DatesTab({ deal }: { deal: any }) {
         <SectionLabel>Key dates</SectionLabel>
         <div style={{ display: "flex", gap: 12, fontSize: 11, color: "var(--muted)" }}>
           <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: "50%", background: "#22c55e" }} />7+ days</span>
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: "50%", background: "#f59e0b" }} />&lt; 3 business days</span>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: "50%", background: "#f59e0b" }} />Approaching</span>
           <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: "50%", background: "#ef4444" }} />Due now</span>
         </div>
       </div>
