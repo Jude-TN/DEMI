@@ -161,7 +161,7 @@ function DealCard({ deal, onDragStart, onDragEnd }: { deal: Deal & { agent?: any
         <div style={{ display: "flex", gap: 3, flexWrap: "wrap", marginBottom: 5 }}>
           <Tag label={deal.side.toUpperCase()} color="muted" size={8} />
           {/* Full sale price with thousands separators */}
-          {deal.sale_price && <Tag label={`${Number(deal.sale_price).toLocaleString("en-US")}`} color="teal" size={8} />}
+          {deal.sale_price && <Tag label={`$${Number(deal.sale_price).toLocaleString("en-US")}`} color="teal" size={8} />}
         </div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
