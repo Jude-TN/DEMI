@@ -64,8 +64,8 @@ export async function POST(req: NextRequest) {
     sale_price: sale_price ? parseFloat(String(sale_price)) : null,
     side: side ?? "buyer",
     stage: stage ?? "under_contract",
-    close_date: close_date ?? null,
-    effective_date: effective_date ?? null,
+    close_date: close_date || null,
+    effective_date: effective_date || null,
     checklist_template_id: checklist_template_id || null,
     notes: notes ?? null,
   }).select().single();
