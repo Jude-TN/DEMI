@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Tag, Avatar, Btn, Modal, Field, SectionLabel, Empty } from "@/components/ui";
 import type { Task, Document, Message, TimelineEvent, Contact, User, ContactRole, DocStatus } from "@/types";
-import { formatDate, formatShort, isOverdue, isDueToday } from "@/lib/utils/dates";
+import { formatDate, formatShort, isOverdue, isDueToday, daysUntil } from "@/lib/utils/dates";
 
 type Tab = "checklist" | "documents" | "messages" | "contacts" | "timeline" | "dates";
 const TABS: { key: Tab; label: string }[] = [
@@ -419,45 +419,101 @@ function TimelineTab({ deal }: { deal: any }) {
 }
 
 // ── Key dates ─────────────────────────────────────────────────────────────────
+const KEY_DATE_FIELDS: { key: string; label: string }[] = [
+  { key: "effective_date",              label: "Executed Contract Date" },
+  { key: "emd_due_date",                label: "EMD Due Date" },
+  { key: "mortgage_application_due",    label: "Mortgage Application Due" },
+  { key: "inspection_period_end",       label: "Inspection Period End Date" },
+  { key: "financing_approval_due",      label: "Financing Approval Due Date" },
+  { key: "survey_due_date",             label: "Survey Due Date" },
+  { key: "flood_insurance_contingency", label: "Flood Insurance Contingency" },
+  { key: "walk_through_date",           label: "Walk-Through Date" },
+  { key: "close_date",                  label: "Closing Date" },
+];
+
+// Business days between today and the target date (excludes weekends).
+function businessDaysUntil(dateStr: string): number {
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const target = new Date(dateStr + "T00:00:00"); target.setHours(0, 0, 0, 0);
+  if (isNaN(target.getTime())) return 999;
+  const past = target < today;
+  let count = 0;
+  const cur = new Date(today);
+  while (cur.getTime() !== target.getTime()) {
+    cur.setDate(cur.getDate() + (past ? -1 : 1));
+    const day = cur.getDay();
+    if (day !== 0 && day !== 6) count += past ? -1 : 1;
+  }
+  return count;
+}
+
+// Green = 7+ days away, Yellow = < 3 business days, Red = due now / overdue.
+function urgency(dateStr: string): { color: string; bg: string; label: string } | null {
+  if (!dateStr) return null;
+  const cal = daysUntil(dateStr);
+  const biz = businessDaysUntil(dateStr);
+  if (biz <= 0) return { color: "#ef4444", bg: "rgba(239,68,68,0.14)", label: cal < 0 ? "Overdue" : "Due now" };
+  if (biz < 3)  return { color: "#f59e0b", bg: "rgba(245,158,11,0.16)", label: biz + " business day" + (biz === 1 ? "" : "s") + " left" };
+  return { color: "#22c55e", bg: "rgba(34,197,94,0.14)", label: cal + " days away" };
+}
+
 function DatesTab({ deal }: { deal: any }) {
-  const [form, setForm] = useState({
-    effective_date: deal.effective_date ?? "",
-    close_date: deal.close_date ?? "",
+  const initial: Record<string, string> = {};
+  KEY_DATE_FIELDS.forEach(f => { initial[f.key] = deal[f.key] ?? ""; });
+  const [form, setForm] = useState<Record<string, string>>({
+    ...initial,
     sale_price: deal.sale_price ? String(deal.sale_price) : "",
     close_price: deal.close_price ? String(deal.close_price) : "",
   });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const supabase = createClient();
 
   async function save() {
     setSaving(true);
+    const payload: Record<string, any> = {
+      sale_price: form.sale_price ? parseFloat(form.sale_price.replace(/,/g, "")) : null,
+      close_price: form.close_price ? parseFloat(form.close_price.replace(/,/g, "")) : null,
+    };
+    KEY_DATE_FIELDS.forEach(f => { payload[f.key] = form[f.key] || null; });
     await fetch(`/api/deals/${deal.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        effective_date: form.effective_date || null,
-        close_date: form.close_date || null,
-        sale_price: form.sale_price ? parseFloat(form.sale_price.replace(/,/g, "")) : null,
-        close_price: form.close_price ? parseFloat(form.close_price.replace(/,/g, "")) : null,
-      }),
+      body: JSON.stringify(payload),
     });
-    // Log timeline
     await fetch(`/api/deals/${deal.id}/timeline`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ event_type: "dates_updated", description: "Key dates updated" }) });
     setSaving(false); setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    setTimeout(() => setSaved(false), 2000);
   }
 
   return (
-    <div style={{ padding: 16, maxWidth: 380 }}>
-      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-        <Field label="Effective date"><input type="date" value={form.effective_date} onChange={e => setForm(p => ({ ...p, effective_date: e.target.value }))} /></Field>
-        <Field label="Close date"><input type="date" value={form.close_date} onChange={e => setForm(p => ({ ...p, close_date: e.target.value }))} /></Field>
+    <div style={{ padding: 16, maxWidth: 460 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14, flexWrap: "wrap" }}>
+        <SectionLabel>Key dates</SectionLabel>
+        <div style={{ display: "flex", gap: 12, fontSize: 11, color: "var(--muted)" }}>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: "50%", background: "#22c55e" }} />7+ days</span>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: "50%", background: "#f59e0b" }} />&lt; 3 business days</span>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}><span style={{ width: 8, height: 8, borderRadius: "50%", background: "#ef4444" }} />Due now</span>
+        </div>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        {KEY_DATE_FIELDS.map(f => {
+          const u = urgency(form[f.key]);
+          return (
+            <div key={f.key} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+                <span style={{ fontSize: 12, color: "var(--muted)" }}>{f.label}</span>
+                {u && <span style={{ fontSize: 10, fontWeight: 700, color: u.color, background: u.bg, padding: "2px 8px", borderRadius: 999 }}>{u.label}</span>}
+              </div>
+              <input type="date" value={form[f.key]} onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))} style={{ borderColor: u ? u.color : undefined, borderWidth: u ? 1 : undefined, borderStyle: u ? "solid" : undefined }} />
+            </div>
+          );
+        })}
+        <div style={{ height: 1, background: "var(--bdr)", margin: "4px 0" }} />
         <Field label="Sale price"><input value={form.sale_price} onChange={e => setForm(p => ({ ...p, sale_price: e.target.value }))} placeholder="485000" /></Field>
         <Field label="Close price (actual)"><input value={form.close_price} onChange={e => setForm(p => ({ ...p, close_price: e.target.value }))} placeholder="Same as sale price if not different" /></Field>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           <Btn variant="primary" onClick={save} loading={saving}>Save dates</Btn>
-          {saved && <span style={{ fontSize: 11, color: "var(--teal)" }}>✓ Saved</span>}
+          {saved && <span style={{ fontSize: 12, color: "var(--teal)" }}>Saved ✓</span>}
         </div>
       </div>
     </div>
