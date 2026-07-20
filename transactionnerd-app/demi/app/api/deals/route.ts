@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
   const { data: deal, error: dealErr } = await supabase.from("deals").insert({
     brokerage_id: bm.brokerage_id,
     agent_id: agent_id ?? user.id,
-    tc_id: tc_id ?? null,
+    tc_id: tc_id || null,
     address, city: city ?? "",
     mls_number: mls_number ?? null,
     sale_price: sale_price ? parseFloat(String(sale_price)) : null,
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
     stage: stage ?? "under_contract",
     close_date: close_date ?? null,
     effective_date: effective_date ?? null,
-    checklist_template_id: checklist_template_id ?? null,
+    checklist_template_id: checklist_template_id || null,
     notes: notes ?? null,
   }).select().single();
 
@@ -93,7 +93,7 @@ export async function POST(req: NextRequest) {
           dueDate = d.toISOString().split("T")[0];
         }
         const assigneeId =
-          step.default_assignee_role === "tc" ? (tc_id ?? null) :
+          step.default_assignee_role === "tc" ? (tc_id || null) :
           step.default_assignee_role === "agent" ? (agent_id ?? user.id) : null;
 
         return {
