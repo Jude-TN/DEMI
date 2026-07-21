@@ -42,8 +42,8 @@ export default function CalendarClient({ events }: { events: CalEvent[] }) {
     <>
       <div style={{ height: 48, minHeight: 48, display: "flex", alignItems: "center", padding: "0 16px", gap: 10, borderBottom: "1px solid var(--bdr)", background: "var(--bg)", position: "sticky", top: 0, zIndex: 10 }}>
         <span style={{ fontSize: 14, fontWeight: 600, flex: 1 }}>Calendar</span>
-        <button style={btn} onClick={() => nav(-1)}>\u2190 Prev</button>
-        <button style={btn} onClick={() => nav(1)}>Next \u2192</button>
+        <button style={btn} onClick={() => nav(-1)}>{"← Prev"}</button>
+        <button style={btn} onClick={() => nav(1)}>{"Next →"}</button>
         <button style={{ ...btn }}>+ Add event</button>
       </div>
       <div style={{ flex: 1, overflowY: "auto", padding: 18 }}>
