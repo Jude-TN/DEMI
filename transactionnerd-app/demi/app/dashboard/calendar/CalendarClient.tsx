@@ -20,7 +20,7 @@ export default function CalendarClient({ events }: { events: CalEvent[] }) {
   const first = new Date(ym.y, ym.m, 1);
   const startDow = first.getDay();
   const daysInMonth = new Date(ym.y, ym.m + 1, 0).getDate();
-  const cells: (Date | null)[] = [];
+  const cells: Date[] = [];
   const prevDays = new Date(ym.y, ym.m, 0).getDate();
   for (let i = 0; i < startDow; i++) cells.push(new Date(ym.y, ym.m - 1, prevDays - startDow + 1 + i));
   for (let d = 1; d <= daysInMonth; d++) cells.push(new Date(ym.y, ym.m, d));
@@ -42,8 +42,8 @@ export default function CalendarClient({ events }: { events: CalEvent[] }) {
     <>
       <div style={{ height: 48, minHeight: 48, display: "flex", alignItems: "center", padding: "0 16px", gap: 10, borderBottom: "1px solid var(--bdr)", background: "var(--bg)", position: "sticky", top: 0, zIndex: 10 }}>
         <span style={{ fontSize: 14, fontWeight: 600, flex: 1 }}>Calendar</span>
-        <button style={btn} onClick={() => nav(-1)}>{"← Prev"}</button>
-        <button style={btn} onClick={() => nav(1)}>{"Next →"}</button>
+        <button style={btn} onClick={() => nav(-1)}>{"â Prev"}</button>
+        <button style={btn} onClick={() => nav(1)}>{"Next â"}</button>
         <button style={{ ...btn }}>+ Add event</button>
       </div>
       <div style={{ flex: 1, overflowY: "auto", padding: 18 }}>
