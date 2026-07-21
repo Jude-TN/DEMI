@@ -92,7 +92,7 @@ function TeamMembers() {
     if (!email) return;
     setInviting(true); setMsg("");
     const res = await fetch("/api/invites", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, role }) });
-    setMsg(res.ok ? `Invite sent to ${email}` : "Failed to send invite.");
+    if (res.ok) { setMsg(`Invite sent to ${email}`); } else { const b = await res.json().catch(() => ({})); setMsg((b && b.error) ? b.error : "Failed to send invite."); }
     setInviting(false); setEmail("");
   }
   return (
