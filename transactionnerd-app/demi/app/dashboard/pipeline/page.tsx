@@ -165,8 +165,14 @@ function DealCard({ deal, onDragStart, onDragEnd }: { deal: Deal & { agent?: any
         </div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            {deal.tc && <Avatar name={deal.tc.full_name} size={14} url={deal.tc.avatar_url} />}
-            {deal.tc && <span style={{ fontSize: 9, color: "var(--muted)" }}>{deal.tc.full_name.split(" ")[0]}</span>}
+            {deal.tc ? (
+              <>
+                <Avatar name={deal.tc.full_name} size={14} url={deal.tc.avatar_url} />
+                <span style={{ fontSize: 9, color: "var(--muted)" }}>{deal.tc.full_name.split(" ")[0]}</span>
+              </>
+            ) : (
+              <span style={{ fontSize: 9, color: "var(--dim)", fontStyle: "italic" }}>Unassigned</span>
+            )}
           </div>
           {deal.close_date && (
             <span style={{ fontSize: 9, color: days <= 3 ? "var(--rose)" : days <= 7 ? "var(--amber)" : "var(--dim)", fontFamily: "monospace" }}>
