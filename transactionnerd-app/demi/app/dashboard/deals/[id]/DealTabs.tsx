@@ -38,7 +38,7 @@ export default function DealTabs({ deal }: { deal: any }) {
   );
 }
 
-// ── Checklist ─────────────────────────────────────────────────────────────────
+// ââ Checklist âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function ChecklistTab({ deal }: { deal: any }) {
   const [tasks, setTasks] = useState<(Task & { assignee?: any })[]>([]);
   const [showAdd, setShowAdd] = useState(false);
@@ -87,9 +87,19 @@ function ChecklistTab({ deal }: { deal: any }) {
 
   const open = tasks.filter(t => !t.completed_at);
   const done = tasks.filter(t => !!t.completed_at);
+  const pct = tasks.length ? Math.round((done.length / tasks.length) * 100) : 0;
 
   return (
     <div style={{ padding: 12 }}>
+      <div style={{ marginBottom: 12 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+          <span style={{ fontSize: 12, color: "var(--muted)" }}>Closing progress</span>
+          <span style={{ fontSize: 12, fontFamily: "monospace", color: "var(--teal)" }}>{done.length}/{tasks.length} tasks · {pct}%</span>
+        </div>
+        <div style={{ height: 6, borderRadius: 999, background: "var(--bdr)", overflow: "hidden" }}>
+          <div style={{ height: "100%", width: pct + "%", background: "var(--teal)", borderRadius: 999, transition: "width 0.3s ease" }} />
+        </div>
+      </div>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
         <span style={{ fontSize: 11, color: "var(--muted)" }}>{done.length}/{tasks.length} complete</span>
         <Btn size="sm" variant="primary" onClick={() => setShowAdd(true)}>+ Add task</Btn>
@@ -99,7 +109,7 @@ function ChecklistTab({ deal }: { deal: any }) {
         <div style={{ fontSize: 9, color: "var(--dim)", fontFamily: "monospace", margin: "12px 0 6px", letterSpacing: 0.5 }}>COMPLETED ({done.length})</div>
         {done.map(t => <TaskRow key={t.id} task={t} onToggle={() => toggle(t)} />)}
       </>}
-      {tasks.length === 0 && <Empty icon="☑" title="No tasks yet" sub="Tasks are auto-generated from the checklist template when a deal is opened" />}
+      {tasks.length === 0 && <Empty icon="â" title="No tasks yet" sub="Tasks are auto-generated from the checklist template when a deal is opened" />}
 
       <Modal open={showAdd} onClose={() => setShowAdd(false)} title="Add task">
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -108,7 +118,7 @@ function ChecklistTab({ deal }: { deal: any }) {
             <Field label="Due date"><input type="date" value={newTask.due_date} onChange={e => setNewTask(p => ({ ...p, due_date: e.target.value }))} /></Field>
             <Field label="Assignee">
               <select value={newTask.assignee_id} onChange={e => setNewTask(p => ({ ...p, assignee_id: e.target.value }))}>
-                <option value="">— None —</option>
+                <option value="">â None â</option>
                 {members.map(m => <option key={m.id} value={m.id}>{m.full_name}</option>)}
               </select>
             </Field>
@@ -130,7 +140,7 @@ function TaskRow({ task, onToggle }: { task: Task & { assignee?: any }; onToggle
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 8, background: "var(--card)", border: `1px solid ${over ? "var(--rose-b)" : "var(--bdr)"}`, borderRadius: 5, padding: "7px 9px", marginBottom: 4 }}>
       <div onClick={onToggle} style={{ width: 14, height: 14, borderRadius: 3, border: `1.5px solid ${done ? "var(--teal)" : "var(--bdrs)"}`, background: done ? "var(--teal)" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 9, color: "#0a1412", flexShrink: 0 }}>
-        {done && "✓"}
+        {done && "â"}
       </div>
       <span style={{ flex: 1, fontSize: 11, color: done ? "var(--dim)" : "var(--text)", textDecoration: done ? "line-through" : "none", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{task.label}</span>
       {!done && task.is_required && <Tag label="REQ" color="muted" size={8} />}
@@ -140,7 +150,7 @@ function TaskRow({ task, onToggle }: { task: Task & { assignee?: any }; onToggle
   );
 }
 
-// ── Documents ─────────────────────────────────────────────────────────────────
+// ââ Documents âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function DocumentsTab({ deal }: { deal: any }) {
   const [docs, setDocs] = useState<(Document & { uploader?: any })[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -200,31 +210,31 @@ function DocumentsTab({ deal }: { deal: any }) {
     <div style={{ padding: 12 }}>
       {missing.length > 0 && (
         <div style={{ background: "var(--rose-d)", border: "1px solid var(--rose-b)", borderRadius: 6, padding: "8px 11px", marginBottom: 10 }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: "var(--rose)", marginBottom: 4 }}>⚠️ {missing.length} missing document{missing.length !== 1 ? "s" : ""}</div>
-          {missing.map(d => <div key={d.id} style={{ fontSize: 11, color: "var(--text)" }}>🚫 {d.name}</div>)}
+          <div style={{ fontSize: 11, fontWeight: 600, color: "var(--rose)", marginBottom: 4 }}>â ï¸ {missing.length} missing document{missing.length !== 1 ? "s" : ""}</div>
+          {missing.map(d => <div key={d.id} style={{ fontSize: 11, color: "var(--text)" }}>ð« {d.name}</div>)}
         </div>
       )}
       <div style={{ display: "flex", gap: 7, marginBottom: 10 }}>
         <input ref={fileRef} type="file" multiple style={{ display: "none" }} onChange={e => { Array.from(e.target.files ?? []).forEach(uploadFile); e.target.value = ""; }} />
-        <Btn size="sm" variant="primary" loading={uploading} onClick={() => fileRef.current?.click()}>⬆ Upload file</Btn>
+        <Btn size="sm" variant="primary" loading={uploading} onClick={() => fileRef.current?.click()}>â¬ Upload file</Btn>
         <Btn size="sm" variant="ghost" onClick={() => setShowTrack(true)}>+ Track document</Btn>
       </div>
 
-      {docs.length === 0 && !uploading && <Empty icon="📄" title="No documents yet" sub="Upload files or track required documents" />}
+      {docs.length === 0 && !uploading && <Empty icon="ð" title="No documents yet" sub="Upload files or track required documents" />}
 
       {docs.map(doc => (
         <div key={doc.id} style={{ background: "var(--card)", border: "1px solid var(--bdr)", borderRadius: 6, overflow: "hidden", marginBottom: 6 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 9, padding: "8px 10px" }}>
-            <span style={{ fontSize: 18, flexShrink: 0 }}>{doc.status === "missing" ? "🚫" : "📄"}</span>
+            <span style={{ fontSize: 18, flexShrink: 0 }}>{doc.status === "missing" ? "ð«" : "ð"}</span>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 11, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{doc.name}</div>
               <div style={{ fontSize: 9, color: "var(--dim)", fontFamily: "monospace" }}>
-                {doc.file_size_bytes ? `${Math.round(Number(doc.file_size_bytes) / 1024)}KB · ` : ""}{formatShort(doc.uploaded_at ?? doc.uploaded_at ?? "")}
-                {doc.uploader && ` · ${doc.uploader.full_name}`}
+                {doc.file_size_bytes ? `${Math.round(Number(doc.file_size_bytes) / 1024)}KB Â· ` : ""}{formatShort(doc.uploaded_at ?? doc.uploaded_at ?? "")}
+                {doc.uploader && ` Â· ${doc.uploader.full_name}`}
               </div>
             </div>
-            {doc.external_ref_url && <a href={doc.external_ref_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 10, color: "var(--blue)", whiteSpace: "nowrap" }}>View →</a>}
-            {doc.file_url && <button onClick={() => download(doc.file_url!, doc.name)} style={{ fontSize: 10, color: "var(--teal)", background: "none", border: "none", cursor: "pointer", whiteSpace: "nowrap" }}>↓ Download</button>}
+            {doc.external_ref_url && <a href={doc.external_ref_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 10, color: "var(--blue)", whiteSpace: "nowrap" }}>View â</a>}
+            {doc.file_url && <button onClick={() => download(doc.file_url!, doc.name)} style={{ fontSize: 10, color: "var(--teal)", background: "none", border: "none", cursor: "pointer", whiteSpace: "nowrap" }}>â Download</button>}
             <select value={doc.status} onChange={e => updateStatus(doc.id, e.target.value as DocStatus)}
               style={{ background: "var(--card2)", border: "1px solid var(--bdrs)", borderRadius: 4, padding: "3px 6px", fontSize: 10, color: "var(--text)", width: "auto", flexShrink: 0 }}>
               <option value="missing">Missing</option>
@@ -250,7 +260,7 @@ function DocumentsTab({ deal }: { deal: any }) {
   );
 }
 
-// ── Messages ──────────────────────────────────────────────────────────────────
+// ââ Messages ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function MessagesTab({ deal }: { deal: any }) {
   const [messages, setMessages] = useState<(Message & { sender?: any })[]>([]);
   const [body, setBody] = useState("");
@@ -288,7 +298,7 @@ function MessagesTab({ deal }: { deal: any }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <div style={{ flex: 1, overflowY: "auto", padding: "10px 12px" }}>
-        {messages.length === 0 && <Empty icon="💬" title="No messages yet" sub="Start the deal thread" />}
+        {messages.length === 0 && <Empty icon="ð¬" title="No messages yet" sub="Start the deal thread" />}
         {messages.map(msg => {
           const mine = msg.sender_id === myId;
           return (
@@ -309,14 +319,14 @@ function MessagesTab({ deal }: { deal: any }) {
         <div ref={bottomRef} />
       </div>
       <form onSubmit={send} style={{ padding: "8px 12px", borderTop: "1px solid var(--bdr)", display: "flex", gap: 7, flexShrink: 0 }}>
-        <input value={body} onChange={e => setBody(e.target.value)} placeholder="Message deal thread…" />
+        <input value={body} onChange={e => setBody(e.target.value)} placeholder="Message deal threadâ¦" />
         <Btn size="sm" variant="primary" type="submit" loading={sending} disabled={!body.trim()}>Send</Btn>
       </form>
     </div>
   );
 }
 
-// ── Contacts ──────────────────────────────────────────────────────────────────
+// ââ Contacts ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const ROLE_LABELS: Record<ContactRole, string> = { buyer: "Buyer", seller: "Seller", buyer_agent: "Buyer Agent", seller_agent: "Seller Agent", title: "Title", lender: "Lender", inspector: "Inspector", other: "Other" };
 const ROLE_COLORS: Record<ContactRole, "teal" | "amber" | "blue" | "muted"> = { buyer: "teal", seller: "amber", buyer_agent: "teal", seller_agent: "amber", title: "blue", lender: "blue", inspector: "muted", other: "muted" };
 
@@ -346,13 +356,13 @@ function ContactsTab({ deal }: { deal: any }) {
       <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 10 }}>
         <Btn size="sm" variant="primary" onClick={() => setShowAdd(true)}>+ Add party</Btn>
       </div>
-      {contacts.length === 0 && <Empty icon="👥" title="No contacts yet" sub="Add buyers, sellers, lenders, and other parties" />}
+      {contacts.length === 0 && <Empty icon="ð¥" title="No contacts yet" sub="Add buyers, sellers, lenders, and other parties" />}
       {contacts.map(c => (
         <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 9, background: "var(--card)", border: "1px solid var(--bdr)", borderRadius: 6, padding: "9px 11px", marginBottom: 5 }}>
           <Avatar name={c.full_name} size={30} />
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 12, fontWeight: 500 }}>{c.full_name}</div>
-            <div style={{ fontSize: 10, color: "var(--muted)" }}>{c.company ? `${c.company} · ` : ""}{ROLE_LABELS[c.role]}</div>
+            <div style={{ fontSize: 10, color: "var(--muted)" }}>{c.company ? `${c.company} Â· ` : ""}{ROLE_LABELS[c.role]}</div>
           </div>
           <div style={{ textAlign: "right", flexShrink: 0 }}>
             {c.email && <div style={{ fontSize: 10, color: "var(--teal)" }}><a href={`mailto:${c.email}`} style={{ color: "inherit" }}>{c.email}</a></div>}
@@ -383,7 +393,7 @@ function ContactsTab({ deal }: { deal: any }) {
   );
 }
 
-// ── Timeline ──────────────────────────────────────────────────────────────────
+// ââ Timeline ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function TimelineTab({ deal }: { deal: any }) {
   const [events, setEvents] = useState<(TimelineEvent & { actor?: any })[]>([]);
   const supabase = createClient();
@@ -395,11 +405,11 @@ function TimelineTab({ deal }: { deal: any }) {
       .then(({ data }) => setEvents(data ?? []));
   }, [deal.id, supabase]);
 
-  const ICONS: Record<string, string> = { deal_opened: "🏠", task_completed: "✅", task_added: "☑", task_reopened: "↩", document_uploaded: "📄", stage_changed: "📊", tc_reassigned: "👤", deal_closed: "🎉", dates_updated: "📅", default: "·" };
+  const ICONS: Record<string, string> = { deal_opened: "ð ", task_completed: "â", task_added: "â", task_reopened: "â©", document_uploaded: "ð", stage_changed: "ð", tc_reassigned: "ð¤", deal_closed: "ð", dates_updated: "ð", default: "Â·" };
 
   return (
     <div style={{ padding: "10px 12px" }}>
-      {events.length === 0 && <Empty icon="📅" title="No activity yet" sub="Events are logged automatically as the deal progresses" />}
+      {events.length === 0 && <Empty icon="ð" title="No activity yet" sub="Events are logged automatically as the deal progresses" />}
       {events.map((ev, i) => (
         <div key={ev.id} style={{ display: "flex", gap: 9, paddingBottom: 10, position: "relative" }}>
           {i < events.length - 1 && <div style={{ position: "absolute", left: 10, top: 22, bottom: 0, width: 1, background: "var(--bdr)" }} />}
@@ -409,7 +419,7 @@ function TimelineTab({ deal }: { deal: any }) {
           <div style={{ paddingTop: 2, flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 11, color: "var(--text)" }}>{ev.description}</div>
             <div style={{ fontSize: 9, color: "var(--dim)", fontFamily: "monospace", marginTop: 2 }}>
-              {ev.actor?.full_name ? `${ev.actor.full_name} · ` : ""}{formatDate(ev.created_at, "MMM d 'at' h:mm a")}
+              {ev.actor?.full_name ? `${ev.actor.full_name} Â· ` : ""}{formatDate(ev.created_at, "MMM d 'at' h:mm a")}
             </div>
           </div>
         </div>
@@ -418,7 +428,7 @@ function TimelineTab({ deal }: { deal: any }) {
   );
 }
 
-// ── Key dates ─────────────────────────────────────────────────────────────────
+// ââ Key dates âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const KEY_DATE_FIELDS: { key: string; label: string }[] = [
   { key: "effective_date",              label: "Executed Contract Date" },
   { key: "emd_due_date",                label: "EMD Due Date" },
@@ -459,6 +469,40 @@ function urgency(dateStr: string): { color: string; bg: string; label: string } 
 }
 
 function DatesTab({ deal }: { deal: any }) {
+  const [stage, setStage] = useState<string>(deal.stage);
+  const [lifeSaving, setLifeSaving] = useState(false);
+  const [lifeMsg, setLifeMsg] = useState("");
+
+  async function changeStage(newStage: string) {
+    setLifeSaving(true);
+    setLifeMsg("");
+    const res = await fetch(`/api/deals/${deal.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ stage: newStage }),
+    });
+    setLifeSaving(false);
+    if (res.ok) {
+      setStage(newStage);
+      setLifeMsg("Stage updated");
+      setTimeout(() => setLifeMsg(""), 2500);
+    } else {
+      setLifeMsg("Could not update stage");
+    }
+  }
+
+  async function archiveDeal() {
+    if (!confirm("Archive this transaction? It will be hidden from the pipeline but can be restored.")) return;
+    setLifeSaving(true);
+    const res = await fetch(`/api/deals/${deal.id}`, { method: "DELETE" });
+    setLifeSaving(false);
+    if (res.ok) {
+      window.location.href = "/dashboard/deals";
+    } else {
+      setLifeMsg("Could not archive (admin only)");
+    }
+  }
+
   const initial: Record<string, string> = {};
   KEY_DATE_FIELDS.forEach(f => { initial[f.key] = deal[f.key] ?? ""; });
   const [form, setForm] = useState<Record<string, string>>({
@@ -498,7 +542,8 @@ function DatesTab({ deal }: { deal: any }) {
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         {KEY_DATE_FIELDS.map(f => {
-          const u = urgency(form[f.key]);
+          let u = urgency(form[f.key]);
+          if (f.key === "effective_date" && form[f.key]) u = { color: "#22c55e", bg: "rgba(34,197,94,0.14)", label: "Set" };
           return (
             <div key={f.key} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
@@ -511,11 +556,30 @@ function DatesTab({ deal }: { deal: any }) {
         })}
         <div style={{ height: 1, background: "var(--bdr)", margin: "4px 0" }} />
         <Field label="Sale price"><input value={form.sale_price} onChange={e => setForm(p => ({ ...p, sale_price: e.target.value }))} placeholder="485000" /></Field>
-        <Field label="Close price (actual)"><input value={form.close_price} onChange={e => setForm(p => ({ ...p, close_price: e.target.value }))} placeholder="Same as sale price if not different" /></Field>
+        <Field label="Closed Price (actual)"><input value={form.close_price} onChange={e => setForm(p => ({ ...p, close_price: e.target.value }))} placeholder="Same as sale price if not different" /></Field>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           <Btn variant="primary" onClick={save} loading={saving}>Save dates</Btn>
-          {saved && <span style={{ fontSize: 12, color: "var(--teal)" }}>Saved ✓</span>}
+          {saved && <span style={{ fontSize: 12, color: "var(--teal)" }}>Saved â</span>}
         </div>
+      </div>
+      <div style={{ marginTop: 20, paddingTop: 16, borderTop: "1px solid var(--bdr)" }}>
+        <div style={{ fontSize: 12, fontWeight: 600, color: "var(--muted)", marginBottom: 10, textTransform: "uppercase", letterSpacing: 0.5 }}>Stage & Lifecycle</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 14 }}>
+          <span style={{ fontSize: 12, color: "var(--muted)" }}>Stage</span>
+          <select value={stage} onChange={(e) => changeStage(e.target.value)} disabled={lifeSaving} style={{ background: "var(--bg)", color: "var(--fg)", border: "1px solid var(--bdr)", borderRadius: 8, padding: "8px 10px", fontSize: 14 }}>
+            <option value="lead">Lead</option>
+            <option value="listing">Listing</option>
+            <option value="under_contract">Under Contract</option>
+            <option value="clear_to_close">Clear to Close</option>
+            <option value="closed">Closed</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <Btn variant="secondary" onClick={() => changeStage("closed")} loading={lifeSaving}>Mark as Closed</Btn>
+          <Btn variant="secondary" onClick={archiveDeal} loading={lifeSaving}>Archive</Btn>
+        </div>
+        {lifeMsg && <div style={{ fontSize: 12, color: "var(--teal)", marginTop: 8 }}>{lifeMsg}</div>}
       </div>
     </div>
   );
