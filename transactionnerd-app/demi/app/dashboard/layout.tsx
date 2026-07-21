@@ -2,8 +2,9 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import Sidebar from "@/components/layout/Sidebar";
 
-const NAV=[{href:"/dashboard",icon:"▦",label:"Dashboard"},{href:"/dashboard/pipeline",icon:"⬛",label:"Pipeline"},{href:"/dashboard/deals",icon:"📋",label:"All deals"},{href:"/dashboard/notifications",icon:"🔔",label:"Notifications"},];
-const NAV2=[{href:"/dashboard/contacts",icon:"👥",label:"Contacts"},{href:"/dashboard/agents",icon:"🏡",label:"Agents"},{href:"/dashboard/reports",icon:"📊",label:"Reports"},{href:"/dashboard/settings",icon:"⚙",label:"Settings"},];
+const NAV=[{href:"/dashboard/pipeline",icon:"🗂️",label:"Transactions"},{href:"/dashboard/inbox",icon:"📥",label:"Inbox"},{href:"/dashboard/documents",icon:"📄",label:"Documents"},{href:"/dashboard/tasks",icon:"✅",label:"Tasks"},{href:"/dashboard/calendar",icon:"📅",label:"Calendar"},];
+const NAV2=[{href:"/dashboard/reports",icon:"📊",label:"Analytics"},{href:"/dashboard/contacts",icon:"👥",label:"Clients"},{href:"/dashboard/agents",icon:"🏡",label:"Agents"},];
+const NAV3=[{href:"/dashboard/settings",icon:"⚙️",label:"Settings"},];
 
 export default async function DashboardLayout({children}:{children:React.ReactNode}){
   const supabase=await createClient();
@@ -14,7 +15,7 @@ export default async function DashboardLayout({children}:{children:React.ReactNo
   const {count}=await supabase.from("notifications").select("id",{count:"exact",head:true}).eq("user_id",user.id).is("read_at",null);
   return(
     <div style={{display:"flex",height:"100vh",overflow:"hidden"}}>
-      <Sidebar user={profile} nav={NAV} section2={NAV2} section2Label="Reporting & Admin" unreadCount={count??0}/>
+      <Sidebar user={profile} nav={NAV} section2={NAV2} section3={NAV3} section1Label="Workspace" section2Label="Reporting" section3Label="Admin" unreadCount={count??0}/>
       <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden"}}>{children}</div>
     </div>
   );
