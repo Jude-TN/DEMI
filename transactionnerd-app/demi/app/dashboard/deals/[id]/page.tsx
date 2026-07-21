@@ -72,10 +72,41 @@ export default async function DealDetailPage({ params }: { params: { id: string 
         </div>
       </div>
 
-      {/* 6-tab workspace */}
-      <div style={{ flex: 1, overflow: "hidden", margin: "0 16px 14px" }}>
-        <DealTabs deal={deal} />
+      {/* Workspace: tabs (left) + Transaction Info (right) */}
+      <div style={{ flex: 1, overflow: "hidden", margin: "0 16px 14px", display: "flex", gap: 12 }}>
+        <div style={{ flex: 1, overflow: "hidden", minWidth: 0 }}>
+          <DealTabs deal={deal} />
+        </div>
+        <TransactionInfo deal={deal} />
       </div>
+    </div>
+  );
+}
+
+function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div style={{ marginBottom: 11 }}>
+      <div style={{ fontSize: 9, color: "var(--dim)", textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 2 }}>{label}</div>
+      <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text)" }}>{value ?? "—"}</div>
+    </div>
+  );
+}
+
+function TransactionInfo({ deal }: { deal: any }) {
+  const price = deal.sale_price != null ? "$" + Number(deal.sale_price).toLocaleString("en-US") : "—";
+  return (
+    <div style={{ width: 240, minWidth: 240, flexShrink: 0, background: "var(--panel)", border: "1px solid var(--bdr)", borderRadius: 8, padding: "14px 15px", overflowY: "auto" }}>
+      <div style={{ fontSize: 10, fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 13 }}>Transaction Info</div>
+      <InfoRow label="Purchase Price" value={price} />
+      <InfoRow label="Closing Date" value={deal.close_date ? formatDate(deal.close_date, "MMM d, yyyy") : "—"} />
+      <InfoRow label="Buyer" value={deal.buyer_name} />
+      <InfoRow label="Seller" value={deal.seller_name} />
+      <InfoRow label="Listing Agent" value={deal.listing_agent} />
+      <InfoRow label="Buyer's Agent" value={deal.buyers_agent} />
+      <InfoRow label="MLS #" value={deal.mls_number} />
+      <InfoRow label="Title Company" value={deal.title_company} />
+      <InfoRow label="Escrow Agent" value={deal.escrow_agent} />
+      <InfoRow label="Lender" value={deal.lender} />
     </div>
   );
 }
