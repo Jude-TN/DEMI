@@ -90,7 +90,7 @@ export default async function TasksPage() {
           </div>
           {aiSuggestions.map((s, i) => (
             <div key={i} style={{ display: "flex", gap: 8, marginBottom: 11 }}>
-              <span style={{ fontSize: 13 }}>\u2728</span>
+              <span style={{ fontSize: 13 }}>{"✨"}</span>
               <div>
                 <div style={{ fontSize: 12.5, fontWeight: 500 }}>{s.title}</div>
                 <div style={{ fontSize: 10.5, color: "var(--muted)", fontFamily: "monospace" }}>{s.sub}</div>
