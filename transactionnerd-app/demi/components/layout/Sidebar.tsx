@@ -7,9 +7,9 @@ import { Avatar } from "@/components/ui";
 
 export interface NavItem { href:string; icon:string; label:string; badge?:number|null; badgeColor?:string; }
 
-interface Props { user:User; nav:NavItem[]; section2?:NavItem[]; section1Label?:string; section2Label?:string; unreadCount?:number; }
+interface Props { user:User; nav:NavItem[]; section2?:NavItem[]; section3?:NavItem[]; section1Label?:string; section2Label?:string; section3Label?:string; unreadCount?:number; }
 
-export default function Sidebar({user,nav,section2,section1Label="Workspace",section2Label="Reporting & Admin",unreadCount}:Props){
+export default function Sidebar({user,nav,section2,section3,section1Label="Workspace",section2Label="Reporting",section3Label="Admin",unreadCount}:Props){
   const pathname=usePathname();
   const router=useRouter();
   const supabase=createClient();
@@ -29,6 +29,7 @@ export default function Sidebar({user,nav,section2,section1Label="Workspace",sec
         <NavSection label={section1Label}/>
         {nav.map(item=><NavLink key={item.href} item={item} active={active(item.href)} badge={item.label==="Notifications"?unreadCount:item.badge}/>)}
         {section2&&section2.length>0&&<><NavSection label={section2Label}/>{section2.map(item=><NavLink key={item.href} item={item} active={active(item.href)}/>)}</>}
+        {section3&&section3.length>0&&<><NavSection label={section3Label}/>{section3.map(item=><NavLink key={item.href} item={item} active={active(item.href)}/>)}</>}
       </div>
       <div style={{padding:"7px 9px",borderTop:"1px solid var(--bdr)"}}>
         <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:6}}>
