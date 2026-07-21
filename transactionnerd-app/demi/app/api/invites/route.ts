@@ -21,6 +21,9 @@ export async function POST(req: NextRequest) {
     data: { invited_role: role, invited_brokerage_id: bm?.brokerage_id },
   });
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    const already = /already been registered|already registered|already exists/i.test(error.message || "");
+    return NextResponse.json({ error: already ? "This user is already invited or registered." : (error.message || "Failed to send invite."), code: already ? "already_registered" : "invite_error" }, { status: already ? 409 : ((error as any).status || 500) });
+  }
   return NextResponse.json({ success: true });
 }
