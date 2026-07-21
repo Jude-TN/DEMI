@@ -1,4 +1,4 @@
-undefinedimport { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { logTimeline, createNotification } from "@/lib/utils/notifications";
 import { addDays, parseISO } from "date-fns";
