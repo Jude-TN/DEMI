@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+undefinedimport { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { logTimeline, createNotification } from "@/lib/utils/notifications";
 import { addDays, parseISO } from "date-fns";
@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
   if (agent)  q = q.eq("agent_id", agent);
   if (tc)     q = q.eq("tc_id", tc);
 
-  // RLS scopes automatically — admin sees all, agent sees own, TC sees assigned
+  // RLS scopes automatically â admin sees all, agent sees own, TC sees assigned
   const { data, error } = await q;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json(data);
@@ -93,16 +93,16 @@ export async function POST(req: NextRequest) {
           dueDate = d.toISOString().split("T")[0];
         }
         const assigneeId =
-          step.default_assignee_role === "tc" ? (tc_id || null) :
-          step.default_assignee_role === "agent" ? (agent_id ?? user.id) : null;
+          step.assignee_role === "tc" ? (tc_id || null) :
+          step.assignee_role === "agent" ? (agent_id ?? user.id) : null;
 
         return {
           deal_id: deal.id,
+          brokerage_id: bm.brokerage_id,
           template_step_id: step.id,
           label: step.label,
           assignee_id: assigneeId,
           due_date: dueDate,
-          is_required: step.is_required,
           sort_order: i,
         };
       });
