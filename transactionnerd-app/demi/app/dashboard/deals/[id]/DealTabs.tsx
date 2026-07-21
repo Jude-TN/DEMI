@@ -576,8 +576,8 @@ function DatesTab({ deal }: { deal: any }) {
           </select>
         </div>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <Btn variant="secondary" onClick={() => changeStage("closed")} loading={lifeSaving}>Mark as Closed</Btn>
-          <Btn variant="secondary" onClick={archiveDeal} loading={lifeSaving}>Archive</Btn>
+          <Btn variant="subtle" onClick={() => changeStage("closed")} loading={lifeSaving}>Mark as Closed</Btn>
+          <Btn variant="danger" onClick={archiveDeal} loading={lifeSaving}>Archive</Btn>
         </div>
         {lifeMsg && <div style={{ fontSize: 12, color: "var(--teal)", marginTop: 8 }}>{lifeMsg}</div>}
       </div>
