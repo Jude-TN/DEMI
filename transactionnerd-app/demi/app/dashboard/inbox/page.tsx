@@ -25,14 +25,14 @@ export default async function InboxPage() {
     .order("created_at", { ascending: false })
     .limit(30);
 
-  const list = msgs || [];
+  const list: any[] = msgs || [];
   const selected: any = list[0];
 
   return (
     <>
       <Topbar
         title="Inbox"
-        actions={<button style={{ background: "transparent", border: "1px solid var(--bdr)", color: "var(--text)", fontSize: 12, fontWeight: 600, padding: "6px 12px", borderRadius: 7, cursor: "pointer" }}>\u2709 Compose</button>}
+        actions={<button style={{ background: "transparent", border: "1px solid var(--bdr)", color: "var(--text)", fontSize: 12, fontWeight: 600, padding: "6px 12px", borderRadius: 7, cursor: "pointer" }}>{"✉ Compose"}</button>}
       />
       <div style={{ flex: 1, display: "grid", gridTemplateColumns: "340px minmax(0,1fr)", overflow: "hidden" }}>
         <div style={{ borderRight: "1px solid var(--bdr)", overflowY: "auto" }}>
@@ -54,20 +54,20 @@ export default async function InboxPage() {
           {selected ? (
             <>
               <div style={{ fontSize: 17, fontWeight: 700, marginBottom: 3 }}>{selected.deal?.address ? selected.deal.address.split(",")[0] : "Message"}</div>
-              <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 16 }}>From: {selected.sender?.full_name || "\u2014"} \u00B7 {fmtTime(selected.created_at)}</div>
+              <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 16 }}>From: {selected.sender?.full_name || "—"} · {fmtTime(selected.created_at)}</div>
 
               <div style={{ background: "var(--teal-d)", border: "1px solid rgba(45,212,191,.35)", borderRadius: 10, padding: 16, marginBottom: 18 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
                   <span style={{ fontSize: 9, fontWeight: 700, fontFamily: "monospace", background: "var(--teal)", color: "#0a1412", padding: "2px 6px", borderRadius: 4 }}>DEMI AI</span>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: "var(--teal)" }}>Email parsed \u2014 action items detected</span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: "var(--teal)" }}>Email parsed — action items detected</span>
                 </div>
-                <div style={{ fontSize: 12.5, marginBottom: 8, display: "flex", gap: 8 }}><span>\u2705</span><span>Key details extracted from message body and attachments</span></div>
-                <div style={{ fontSize: 12.5, marginBottom: 8, display: "flex", gap: 8 }}><span>\u{1F4C5}</span><span>Tasks created and assigned to the coordinator</span></div>
-                <div style={{ fontSize: 12.5, marginBottom: 12, display: "flex", gap: 8 }}><span>\u26A0\uFE0F</span><span>Follow-up items flagged for review</span></div>
+                <div style={{ fontSize: 12.5, marginBottom: 8, display: "flex", gap: 8 }}><span>{"✅"}</span><span>Key details extracted from message body and attachments</span></div>
+                <div style={{ fontSize: 12.5, marginBottom: 8, display: "flex", gap: 8 }}><span>{"📅"}</span><span>Tasks created and assigned to the coordinator</span></div>
+                <div style={{ fontSize: 12.5, marginBottom: 12, display: "flex", gap: 8 }}><span>{"⚠️"}</span><span>Follow-up items flagged for review</span></div>
                 <div style={{ display: "flex", gap: 8 }}>
-                  <button style={{ background: "var(--card2)", border: "1px solid var(--bdr)", color: "var(--text)", fontSize: 12, fontWeight: 600, padding: "7px 12px", borderRadius: 7, cursor: "pointer" }}>\u2713 Accept tasks</button>
-                  <button style={{ background: "var(--card2)", border: "1px solid var(--bdr)", color: "var(--text)", fontSize: 12, fontWeight: 600, padding: "7px 12px", borderRadius: 7, cursor: "pointer" }}>\u270E Edit tasks</button>
-                  <button style={{ background: "var(--card2)", border: "1px solid var(--bdr)", color: "var(--text)", fontSize: 12, fontWeight: 600, padding: "7px 12px", borderRadius: 7, cursor: "pointer" }}>\u21A9 Draft reply</button>
+                  <button style={{ background: "var(--card2)", border: "1px solid var(--bdr)", color: "var(--text)", fontSize: 12, fontWeight: 600, padding: "7px 12px", borderRadius: 7, cursor: "pointer" }}>{"✓ Accept tasks"}</button>
+                  <button style={{ background: "var(--card2)", border: "1px solid var(--bdr)", color: "var(--text)", fontSize: 12, fontWeight: 600, padding: "7px 12px", borderRadius: 7, cursor: "pointer" }}>{"✎ Edit tasks"}</button>
+                  <button style={{ background: "var(--card2)", border: "1px solid var(--bdr)", color: "var(--text)", fontSize: 12, fontWeight: 600, padding: "7px 12px", borderRadius: 7, cursor: "pointer" }}>{"↩ Draft reply"}</button>
                 </div>
               </div>
 
