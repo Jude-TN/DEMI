@@ -138,13 +138,13 @@ function TaskRow({ task, onToggle }: { task: Task & { assignee?: any }; onToggle
   const over = !done && isOverdue(task.due_date);
   const today = !done && !over && isDueToday(task.due_date);
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 8, background: "var(--card)", border: `1px solid ${over ? "var(--rose-b)" : "var(--bdr)"}`, borderRadius: 5, padding: "7px 9px", marginBottom: 4 }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 8, background: over ? "rgba(229,83,91,.08)" : today ? "rgba(244,165,53,.08)" : "var(--card)", border: `1px solid ${over ? "var(--rose-b)" : today ? "var(--amber-b)" : "var(--bdr)"}`, borderLeft: `3px solid ${over ? "var(--rose)" : today ? "var(--amber)" : "var(--bdr)"}`, borderRadius: 5, padding: "7px 9px", marginBottom: 4 }}>
       <div onClick={onToggle} style={{ width: 14, height: 14, borderRadius: 3, border: `1.5px solid ${done ? "var(--teal)" : "var(--bdrs)"}`, background: done ? "var(--teal)" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 9, color: "#0a1412", flexShrink: 0 }}>
         {done && "✓"}
       </div>
       <span style={{ flex: 1, fontSize: 11, color: done ? "var(--dim)" : "var(--text)", textDecoration: done ? "line-through" : "none", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{task.label}</span>
       {!done && task.is_required && <Tag label="REQ" color="muted" size={8} />}
-      {task.due_date && <span style={{ fontSize: 9, fontFamily: "monospace", color: over ? "var(--rose)" : today ? "var(--amber)" : "var(--dim)", whiteSpace: "nowrap" }}>{formatShort(task.due_date)}</span>}
+      {task.due_date && <span style={{ fontSize: 9, fontFamily: "monospace", color: over ? "var(--rose)" : today ? "var(--amber)" : "var(--dim)", whiteSpace: "nowrap" }}>{over ? "\u26A0 " : today ? "\u23F0 " : ""}{formatShort(task.due_date)}</span>}
       {task.assignee && <Avatar name={task.assignee.full_name} size={16} url={task.assignee.avatar_url} />}
     </div>
   );
