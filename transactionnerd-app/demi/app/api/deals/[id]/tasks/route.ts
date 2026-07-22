@@ -30,7 +30,6 @@ export async function POST(req: NextRequest, { params }: P) {
     label: body.label,
     assignee_id: body.assignee_id ?? null,
     due_date: body.due_date ?? null,
-    is_required: body.is_required ?? true,
     sort_order: body.sort_order ?? 999,
   }).select().single();
 
