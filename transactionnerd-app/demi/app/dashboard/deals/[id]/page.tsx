@@ -107,6 +107,7 @@ function TransactionInfo({ deal }: { deal: any }) {
       <InfoRow label="Title Company" value={deal.title_company} />
       <InfoRow label="Escrow Agent" value={deal.escrow_agent} />
       <InfoRow label="Lender" value={deal.lender} />
+          <InfoRow label="Transaction Email" value={deal.transaction_email || `deal-${String(deal.id).slice(0,8)}@txn.transactionnerd.com`} />
     </div>
   );
 }
