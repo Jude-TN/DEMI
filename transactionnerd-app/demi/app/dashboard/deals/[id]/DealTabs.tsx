@@ -38,7 +38,7 @@ export default function DealTabs({ deal }: { deal: any }) {
   );
 }
 
-// ââ Checklist âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── Checklist ─────────────────────────────────────────────────────────────────
 function ChecklistTab({ deal }: { deal: any }) {
   const [tasks, setTasks] = useState<(Task & { assignee?: any })[]>([]);
   const [showAdd, setShowAdd] = useState(false);
@@ -109,7 +109,7 @@ function ChecklistTab({ deal }: { deal: any }) {
         <div style={{ fontSize: 9, color: "var(--dim)", fontFamily: "monospace", margin: "12px 0 6px", letterSpacing: 0.5 }}>COMPLETED ({done.length})</div>
         {done.map(t => <TaskRow key={t.id} task={t} onToggle={() => toggle(t)} />)}
       </>}
-      {tasks.length === 0 && <Empty icon="â" title="No tasks yet" sub="Tasks are auto-generated from the checklist template when a deal is opened" />}
+      {tasks.length === 0 && <Empty icon="☑" title="No tasks yet" sub="Tasks are auto-generated from the checklist template when a deal is opened" />}
 
       <Modal open={showAdd} onClose={() => setShowAdd(false)} title="Add task">
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -118,7 +118,7 @@ function ChecklistTab({ deal }: { deal: any }) {
             <Field label="Due date"><input type="date" value={newTask.due_date} onChange={e => setNewTask(p => ({ ...p, due_date: e.target.value }))} /></Field>
             <Field label="Assignee">
               <select value={newTask.assignee_id} onChange={e => setNewTask(p => ({ ...p, assignee_id: e.target.value }))}>
-                <option value="">â None â</option>
+                <option value="">— None —</option>
                 {members.map(m => <option key={m.id} value={m.id}>{m.full_name}</option>)}
               </select>
             </Field>
@@ -140,7 +140,7 @@ function TaskRow({ task, onToggle }: { task: Task & { assignee?: any }; onToggle
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 8, background: "var(--card)", border: `1px solid ${over ? "var(--rose-b)" : "var(--bdr)"}`, borderRadius: 5, padding: "7px 9px", marginBottom: 4 }}>
       <div onClick={onToggle} style={{ width: 14, height: 14, borderRadius: 3, border: `1.5px solid ${done ? "var(--teal)" : "var(--bdrs)"}`, background: done ? "var(--teal)" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 9, color: "#0a1412", flexShrink: 0 }}>
-        {done && "â"}
+        {done && "✓"}
       </div>
       <span style={{ flex: 1, fontSize: 11, color: done ? "var(--dim)" : "var(--text)", textDecoration: done ? "line-through" : "none", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{task.label}</span>
       {!done && task.is_required && <Tag label="REQ" color="muted" size={8} />}
@@ -150,7 +150,7 @@ function TaskRow({ task, onToggle }: { task: Task & { assignee?: any }; onToggle
   );
 }
 
-// ââ Documents âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── Documents ─────────────────────────────────────────────────────────────────
 function DocumentsTab({ deal }: { deal: any }) {
   const [docs, setDocs] = useState<(Document & { uploader?: any })[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -210,31 +210,31 @@ function DocumentsTab({ deal }: { deal: any }) {
     <div style={{ padding: 12 }}>
       {missing.length > 0 && (
         <div style={{ background: "var(--rose-d)", border: "1px solid var(--rose-b)", borderRadius: 6, padding: "8px 11px", marginBottom: 10 }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: "var(--rose)", marginBottom: 4 }}>â ï¸ {missing.length} missing document{missing.length !== 1 ? "s" : ""}</div>
-          {missing.map(d => <div key={d.id} style={{ fontSize: 11, color: "var(--text)" }}>ð« {d.name}</div>)}
+          <div style={{ fontSize: 11, fontWeight: 600, color: "var(--rose)", marginBottom: 4 }}>⚠️ {missing.length} missing document{missing.length !== 1 ? "s" : ""}</div>
+          {missing.map(d => <div key={d.id} style={{ fontSize: 11, color: "var(--text)" }}>🚫 {d.name}</div>)}
         </div>
       )}
       <div style={{ display: "flex", gap: 7, marginBottom: 10 }}>
         <input ref={fileRef} type="file" multiple style={{ display: "none" }} onChange={e => { Array.from(e.target.files ?? []).forEach(uploadFile); e.target.value = ""; }} />
-        <Btn size="sm" variant="primary" loading={uploading} onClick={() => fileRef.current?.click()}>â¬ Upload file</Btn>
+        <Btn size="sm" variant="primary" loading={uploading} onClick={() => fileRef.current?.click()}>⬆ Upload file</Btn>
         <Btn size="sm" variant="ghost" onClick={() => setShowTrack(true)}>+ Track document</Btn>
       </div>
 
-      {docs.length === 0 && !uploading && <Empty icon="ð" title="No documents yet" sub="Upload files or track required documents" />}
+      {docs.length === 0 && !uploading && <Empty icon="📄" title="No documents yet" sub="Upload files or track required documents" />}
 
       {docs.map(doc => (
         <div key={doc.id} style={{ background: "var(--card)", border: "1px solid var(--bdr)", borderRadius: 6, overflow: "hidden", marginBottom: 6 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 9, padding: "8px 10px" }}>
-            <span style={{ fontSize: 18, flexShrink: 0 }}>{doc.status === "missing" ? "ð«" : "ð"}</span>
+            <span style={{ fontSize: 18, flexShrink: 0 }}>{doc.status === "missing" ? "🚫" : "📄"}</span>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 11, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{doc.name}</div>
               <div style={{ fontSize: 9, color: "var(--dim)", fontFamily: "monospace" }}>
-                {doc.file_size_bytes ? `${Math.round(Number(doc.file_size_bytes) / 1024)}KB Â· ` : ""}{formatShort(doc.uploaded_at ?? doc.uploaded_at ?? "")}
-                {doc.uploader && ` Â· ${doc.uploader.full_name}`}
+                {doc.file_size_bytes ? `${Math.round(Number(doc.file_size_bytes) / 1024)}KB · ` : ""}{formatShort(doc.uploaded_at ?? doc.uploaded_at ?? "")}
+                {doc.uploader && ` · ${doc.uploader.full_name}`}
               </div>
             </div>
-            {doc.external_ref_url && <a href={doc.external_ref_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 10, color: "var(--blue)", whiteSpace: "nowrap" }}>View â</a>}
-            {doc.file_url && <button onClick={() => download(doc.file_url!, doc.name)} style={{ fontSize: 10, color: "var(--teal)", background: "none", border: "none", cursor: "pointer", whiteSpace: "nowrap" }}>â Download</button>}
+            {doc.external_ref_url && <a href={doc.external_ref_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 10, color: "var(--blue)", whiteSpace: "nowrap" }}>View →</a>}
+            {doc.file_url && <button onClick={() => download(doc.file_url!, doc.name)} style={{ fontSize: 10, color: "var(--teal)", background: "none", border: "none", cursor: "pointer", whiteSpace: "nowrap" }}>↓ Download</button>}
             <select value={doc.status} onChange={e => updateStatus(doc.id, e.target.value as DocStatus)}
               style={{ background: "var(--card2)", border: "1px solid var(--bdrs)", borderRadius: 4, padding: "3px 6px", fontSize: 10, color: "var(--text)", width: "auto", flexShrink: 0 }}>
               <option value="missing">Missing</option>
@@ -260,7 +260,7 @@ function DocumentsTab({ deal }: { deal: any }) {
   );
 }
 
-// ââ Messages ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── Messages ──────────────────────────────────────────────────────────────────
 function MessagesTab({ deal }: { deal: any }) {
   const [messages, setMessages] = useState<(Message & { sender?: any })[]>([]);
   const [body, setBody] = useState("");
@@ -298,7 +298,7 @@ function MessagesTab({ deal }: { deal: any }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <div style={{ flex: 1, overflowY: "auto", padding: "10px 12px" }}>
-        {messages.length === 0 && <Empty icon="ð¬" title="No messages yet" sub="Start the deal thread" />}
+        {messages.length === 0 && <Empty icon="💬" title="No messages yet" sub="Start the deal thread" />}
         {messages.map(msg => {
           const mine = msg.sender_id === myId;
           return (
@@ -319,14 +319,14 @@ function MessagesTab({ deal }: { deal: any }) {
         <div ref={bottomRef} />
       </div>
       <form onSubmit={send} style={{ padding: "8px 12px", borderTop: "1px solid var(--bdr)", display: "flex", gap: 7, flexShrink: 0 }}>
-        <input value={body} onChange={e => setBody(e.target.value)} placeholder="Message deal threadâ¦" />
+        <input value={body} onChange={e => setBody(e.target.value)} placeholder="Message deal thread…" />
         <Btn size="sm" variant="primary" type="submit" loading={sending} disabled={!body.trim()}>Send</Btn>
       </form>
     </div>
   );
 }
 
-// ââ Contacts ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── Contacts ──────────────────────────────────────────────────────────────────
 const ROLE_LABELS: Record<ContactRole, string> = { buyer: "Buyer", seller: "Seller", buyer_agent: "Buyer Agent", seller_agent: "Seller Agent", title: "Title", lender: "Lender", inspector: "Inspector", other: "Other" };
 const ROLE_COLORS: Record<ContactRole, "teal" | "amber" | "blue" | "muted"> = { buyer: "teal", seller: "amber", buyer_agent: "teal", seller_agent: "amber", title: "blue", lender: "blue", inspector: "muted", other: "muted" };
 
@@ -356,13 +356,13 @@ function ContactsTab({ deal }: { deal: any }) {
       <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 10 }}>
         <Btn size="sm" variant="primary" onClick={() => setShowAdd(true)}>+ Add party</Btn>
       </div>
-      {contacts.length === 0 && <Empty icon="ð¥" title="No contacts yet" sub="Add buyers, sellers, lenders, and other parties" />}
+      {contacts.length === 0 && <Empty icon="👥" title="No contacts yet" sub="Add buyers, sellers, lenders, and other parties" />}
       {contacts.map(c => (
         <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 9, background: "var(--card)", border: "1px solid var(--bdr)", borderRadius: 6, padding: "9px 11px", marginBottom: 5 }}>
           <Avatar name={c.full_name} size={30} />
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 12, fontWeight: 500 }}>{c.full_name}</div>
-            <div style={{ fontSize: 10, color: "var(--muted)" }}>{c.company ? `${c.company} Â· ` : ""}{ROLE_LABELS[c.role]}</div>
+            <div style={{ fontSize: 10, color: "var(--muted)" }}>{c.company ? `${c.company} · ` : ""}{ROLE_LABELS[c.role]}</div>
           </div>
           <div style={{ textAlign: "right", flexShrink: 0 }}>
             {c.email && <div style={{ fontSize: 10, color: "var(--teal)" }}><a href={`mailto:${c.email}`} style={{ color: "inherit" }}>{c.email}</a></div>}
@@ -393,7 +393,7 @@ function ContactsTab({ deal }: { deal: any }) {
   );
 }
 
-// ââ Timeline ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── Timeline ──────────────────────────────────────────────────────────────────
 function TimelineTab({ deal }: { deal: any }) {
   const [events, setEvents] = useState<(TimelineEvent & { actor?: any })[]>([]);
   const supabase = createClient();
@@ -405,11 +405,11 @@ function TimelineTab({ deal }: { deal: any }) {
       .then(({ data }) => setEvents(data ?? []));
   }, [deal.id, supabase]);
 
-  const ICONS: Record<string, string> = { deal_opened: "ð ", task_completed: "â", task_added: "â", task_reopened: "â©", document_uploaded: "ð", stage_changed: "ð", tc_reassigned: "ð¤", deal_closed: "ð", dates_updated: "ð", default: "Â·" };
+  const ICONS: Record<string, string> = { deal_opened: "🏠", task_completed: "✅", task_added: "☑", task_reopened: "↩", document_uploaded: "📄", stage_changed: "📊", tc_reassigned: "👤", deal_closed: "🎉", dates_updated: "📅", default: "·" };
 
   return (
     <div style={{ padding: "10px 12px" }}>
-      {events.length === 0 && <Empty icon="ð" title="No activity yet" sub="Events are logged automatically as the deal progresses" />}
+      {events.length === 0 && <Empty icon="📅" title="No activity yet" sub="Events are logged automatically as the deal progresses" />}
       {events.map((ev, i) => (
         <div key={ev.id} style={{ display: "flex", gap: 9, paddingBottom: 10, position: "relative" }}>
           {i < events.length - 1 && <div style={{ position: "absolute", left: 10, top: 22, bottom: 0, width: 1, background: "var(--bdr)" }} />}
@@ -419,7 +419,7 @@ function TimelineTab({ deal }: { deal: any }) {
           <div style={{ paddingTop: 2, flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 11, color: "var(--text)" }}>{ev.description}</div>
             <div style={{ fontSize: 9, color: "var(--dim)", fontFamily: "monospace", marginTop: 2 }}>
-              {ev.actor?.full_name ? `${ev.actor.full_name} Â· ` : ""}{formatDate(ev.created_at, "MMM d 'at' h:mm a")}
+              {ev.actor?.full_name ? `${ev.actor.full_name} · ` : ""}{formatDate(ev.created_at, "MMM d 'at' h:mm a")}
             </div>
           </div>
         </div>
@@ -428,7 +428,7 @@ function TimelineTab({ deal }: { deal: any }) {
   );
 }
 
-// ââ Key dates âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── Key dates ─────────────────────────────────────────────────────────────────
 const KEY_DATE_FIELDS: { key: string; label: string }[] = [
   { key: "effective_date",              label: "Executed Contract Date" },
   { key: "emd_due_date",                label: "EMD Due Date" },
@@ -559,7 +559,7 @@ function DatesTab({ deal }: { deal: any }) {
         <Field label="Closed Price (actual)"><input value={form.close_price} onChange={e => setForm(p => ({ ...p, close_price: e.target.value }))} placeholder="Same as sale price if not different" /></Field>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           <Btn variant="primary" onClick={save} loading={saving}>Save dates</Btn>
-          {saved && <span style={{ fontSize: 12, color: "var(--teal)" }}>Saved â</span>}
+          {saved && <span style={{ fontSize: 12, color: "var(--teal)" }}>Saved ✓</span>}
         </div>
       </div>
       <div style={{ marginTop: 20, paddingTop: 16, borderTop: "1px solid var(--bdr)" }}>
