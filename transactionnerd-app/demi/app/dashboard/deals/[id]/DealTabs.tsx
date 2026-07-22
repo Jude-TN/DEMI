@@ -175,7 +175,7 @@ function DocumentsTab({ deal }: { deal: any }) {
     const { error } = await supabase.storage.from("deal-documents").upload(path, file);
     if (!error) {
       await supabase.from("documents").insert({
-        deal_id: deal.id, name: file.name, file_url: path,
+        brokerage_id: deal.brokerage_id, deal_id: deal.id, name: file.name, file_url: path,
         file_size_bytes: file.size, doc_type: "other", status: "received",
         uploaded_by: user?.id, uploaded_at: new Date().toISOString(),
       });
@@ -193,7 +193,7 @@ function DocumentsTab({ deal }: { deal: any }) {
 
   async function trackDoc() {
     if (!newDoc.name) return;
-    await supabase.from("documents").insert({ deal_id: deal.id, name: newDoc.name, doc_type: newDoc.doc_type, status: newDoc.status });
+    await supabase.from("documents").insert({ brokerage_id: deal.brokerage_id, deal_id: deal.id, name: newDoc.name, doc_type: newDoc.doc_type, status: newDoc.status });
     setShowTrack(false);
     setNewDoc({ name: "", doc_type: "other", status: "received" });
     loadDocs();
