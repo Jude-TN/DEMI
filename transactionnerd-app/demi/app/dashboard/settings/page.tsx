@@ -76,6 +76,7 @@ function BrokerageProfile() {
 
 function TeamMembers() {
   const [members, setMembers] = useState<any[]>([]);
+  const [pending, setPending] = useState<any[]>([]);
   const [email, setEmail] = useState(""); const [role, setRole] = useState<"tc"|"agent">("agent");
   const [inviting, setInviting] = useState(false); const [msg, setMsg] = useState("");
   const supabase = createClient();
@@ -85,6 +86,8 @@ function TeamMembers() {
       const { data: bm } = await supabase.from("brokerage_members").select("brokerage_id").eq("user_id", user!.id).eq("is_active", true).single();
       const { data } = await supabase.from("brokerage_members").select("role,users(*)").eq("brokerage_id", bm!.brokerage_id).eq("is_active", true) as any;
       setMembers(data ?? []);
+      const { data: inv } = await supabase.from("invitations").select("id,email,role,status").eq("brokerage_id", bm?.brokerage_id).eq("status", "pending") as any;
+      setPending(inv ?? []);
     }
     load();
   }, []);
@@ -112,6 +115,13 @@ function TeamMembers() {
           <Avatar name={m.users?.full_name ?? "?"} size={32} url={m.users?.avatar_url} />
           <div style={{ flex: 1, minWidth: 0 }}><div style={{ fontSize: 12, fontWeight: 500 }}>{m.users?.full_name}</div><div style={{ fontSize: 10, color: "var(--muted)" }}>{m.users?.email}</div></div>
           <RoleBadge role={m.role} />
+        </div>
+      ))}
+      {pending.map((p: any) => (
+        <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 12px", background: "var(--panel)", border: "1px solid var(--bdr)", borderRadius: 8, marginBottom: 6, opacity: 0.7 }}>
+          <Avatar name={p.email || "?"} size={32} />
+          <div style={{ flex: 1, minWidth: 0 }}><div style={{ fontSize: 14, fontWeight: 600 }}>{p.email}</div><div style={{ fontSize: 12, color: "var(--muted)" }}>Invited &middot; {p.role}</div></div>
+          <Tag>Pending</Tag>
         </div>
       ))}
     </div>
