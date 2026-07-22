@@ -121,7 +121,7 @@ function TeamMembers() {
         <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 12px", background: "var(--panel)", border: "1px solid var(--bdr)", borderRadius: 8, marginBottom: 6, opacity: 0.7 }}>
           <Avatar name={p.email || "?"} size={32} />
           <div style={{ flex: 1, minWidth: 0 }}><div style={{ fontSize: 14, fontWeight: 600 }}>{p.email}</div><div style={{ fontSize: 12, color: "var(--muted)" }}>Invited &middot; {p.role}</div></div>
-          <Tag>Pending</Tag>
+          <Tag label="Pending" />
         </div>
       ))}
     </div>
