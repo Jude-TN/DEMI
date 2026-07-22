@@ -163,8 +163,8 @@ function RoutingRules() {
 function Integrations() {
   const CONNECTED = [{icon:"🔗",name:"Follow Up Boss",desc:"Sync contacts, trigger post-close sequences",status:"connected"},{icon:"📋",name:"Dotloop",desc:"Deep-link loops, sync executed status",status:"connected"},{icon:"✍️",name:"DocuSign",desc:"Send envelopes, track signature status",status:"connected"},{icon:"⚡",name:"Zapier",desc:"Outbound webhooks on deal events",status:"connected"}];
   const PLANNED = [{icon:"☁️",name:"SkySlope",desc:"Compliance file sync, brokerage review",status:"priority"},{icon:"📧",name:"Gmail / Outlook",desc:"Sync deal emails, send from DEMI",status:"planned"},{icon:"📅",name:"Google Calendar",desc:"Sync closing dates to agent calendars",status:"planned"},{icon:"💳",name:"Stripe",desc:"Subscription management and invoicing",status:"internal"}];
-  const CLR:Record<string,[string,string]>={connected:["var(--teal-d)","var(--teal)"],priority:["var(--rose-d)","var(--rose)"],planned:["var(--amber-d)","var(--amber)"],internal:["rgba(255,255,255,.05)","var(--muted)"]};
-  const LBL:Record<string,string>={connected:"Connected",priority:"Priority v2",planned:"Planned",internal:"Internal"};
+  const CLR:Record<string,[string,string]>={connected:["rgba(255,255,255,.05)","var(--muted)"],priority:["var(--rose-d)","var(--rose)"],planned:["var(--amber-d)","var(--amber)"],internal:["rgba(255,255,255,.05)","var(--muted)"]};
+  const LBL:Record<string,string>={connected:"Not connected",priority:"Priority v2",planned:"Planned",internal:"Internal"};
   return (
     <div style={{ maxWidth: 640 }}>
       <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 14 }}>Integrations</div>
