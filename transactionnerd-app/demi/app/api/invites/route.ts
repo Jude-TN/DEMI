@@ -25,5 +25,14 @@ export async function POST(req: NextRequest) {
     const already = /already been registered|already registered|already exists/i.test(error.message || "");
     return NextResponse.json({ error: already ? "This user is already invited or registered." : (error.message || "Failed to send invite."), code: already ? "already_registered" : "invite_error" }, { status: already ? 409 : ((error as any).status || 500) });
   }
+  // Record a pending invitation so it shows on the Team Members page immediately
+  await admin.from("invitations").insert({
+    brokerage_id: bm?.brokerage_id,
+    email,
+    role,
+    invited_by: user.id,
+    status: "pending",
+  });
+
   return NextResponse.json({ success: true });
 }
